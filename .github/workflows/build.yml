@@ -59,9 +59,26 @@ jobs:
           for file in "${shell_files[@]}"; do
             busybox ash -n "$file"
           done
+          # A '#' inside a multi-line list is a shell comment to a reader, but
+          # abuild word-splits depends=/makedepends=/subpackages= and hands every
+          # word to apk, so the comment becomes a package name and the build dies
+          # with "'<word>' is not a valid package dependency". That only shows up
+          # in the build job, minutes into the deps stage, so catch it here.
+          if list_comments=$(awk '
+            /^[a-z_][a-z0-9_]*="$/ { inlist = 1; next }
+            inlist && /^[[:space:]]*"$/ { inlist = 0; next }
+            inlist && /^[[:space:]]*#/ { printf "%s:%d: %s\n", FILENAME, FNR, $0 }
+          ' "${shell_files[@]}"); [ -n "$list_comments" ]; then
+            echo '::error::comment lines inside a quoted list are passed to apk as' \
+              'package names; move them above the assignment' >&2
+            echo "$list_comments" >&2
+            exit 1
+          fi
           for script in scripts/*.py; do python3 -m py_compile "$script"; done
           go install github.com/rhysd/actionlint/cmd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
-          "$(go env GOPATH)/bin/actionlint" -config-file .github/actionlint.yaml .github/workflows/build.yml
+          # Every workflow, not just the one that publishes: update.yml has the
+          # same embedded shell to lint and the same runner labels to check.
+          "$(go env GOPATH)/bin/actionlint" -config-file .github/actionlint.yaml .github/workflows/*.yml
       - name: Check that generated recipes are committed
         run: |
           python3 scripts/gen-app-recipes.py

@@ -11,6 +11,11 @@ Craft apps are built is a one-line change for all fifteen.
 
 ### Bumping a version
 
+Usually nothing needs to happen: `.github/workflows/update.yml` runs the script
+below once a day and releases the result. Bump by hand to pin an app to an older
+version than the newest release, to unpin one, or to get a fix out without waiting
+for the next scheduled run.
+
 ```sh
 python3 scripts/update-checksums.py            # all apps
 python3 scripts/update-checksums.py --app photocraft
@@ -21,15 +26,22 @@ downloads the tarball, reads `[workspace.package] version` from its root
 `Cargo.toml` and refuses to record a tag whose version does not match — that
 cross-check is what keeps a mis-tagged release from producing a package whose
 `pkgver` lies. It then rewrites the lockfile and runs the recipe generator, so
-the commit it leaves behind is exactly what CI expects.
+the commit it leaves behind is exactly what CI expects. It writes nothing unless
+every app resolved: one unreachable repository leaves the lockfile alone and exits
+nonzero, which is why the update workflow reports it instead of releasing a bump
+that quietly omits an app.
 
 `python3 scripts/update-checksums.py --check` does the same comparison without
-writing anything. CI runs it on every run and turns a stale lockfile into a
-warning annotation rather than a failure: a release published yesterday is not a
-defect in the change being built, and it should not hold up publishing the other
-fourteen packages. The weekly schedule run is the one that annotation is aimed
-at. A checksum that is simply *wrong* is a different matter - abuild verifies it
-and fails the build.
+writing anything. The build workflow runs it on every run and turns a stale
+lockfile into a warning annotation rather than a failure: a release published
+yesterday is not a defect in the change being built, and it should not hold up
+publishing the other fourteen packages. Now that the update workflow releases
+daily, that annotation is a backstop - it goes off if the update workflow is
+broken or disabled, not in the normal course of events. A checksum that is simply
+*wrong* is a different matter - abuild verifies it and fails the build.
+
+`web-browser` is not in the lockfile and is not touched by any of this; see
+[docs/browser.md](browser.md) to bump it.
 
 ### Adding an app
 
@@ -128,7 +140,11 @@ apply to any recipe here:
 plus the outputs the publish job needs:
 
 - a tag `v*`, a manual run or the weekly schedule builds every package for every
-  architecture and publishes the result;
+  architecture and publishes the result. Tags are dates
+  (`v<year>.<month>.<number-in-month>`) and are normally created by the update
+  workflow, which pushes one whenever upstream moves and then dispatches this
+  workflow for it - a tag pushed with `GITHUB_TOKEN` would not start a run on its
+  own, since GitHub ignores workflow events triggered by that token;
 - anything else - a pull request, or a push to the branch the workflow watches -
   builds `x86_64` only and does not publish;
 - `web-browser` appears only on the architectures in `browser_arches`;

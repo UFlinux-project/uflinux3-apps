@@ -1,0 +1,214 @@
+name: Check for upstream updates
+
+# build.yml turns config/apps.lock.json into a published APK repository. This is
+# the other half: the job that keeps that file pointing at the newest stable
+# upstream release. Once a day it resolves the newest release of every Craft app
+# and, if any of them moved, commits the bump (lockfile plus the recipes the
+# lockfile generates), tags it and hands the tag to build.yml, which builds
+# every package for every architecture and replaces the published repository.
+# When nothing has moved nothing is pushed, so a quiet day costs one cheap job.
+#
+# The tag names a repository release, not an app version: fifteen apps move
+# independently, so no single app's version describes the set. It is therefore
+# dated - v<YYYY>.<MM>.<NN>, the NNth release of that month - which is what
+# build.yml's `v[0-9]+.[0-9]+.[0-9]+` rule accepts, what sorts correctly, and
+# what cannot collide with an earlier tag of its own.
+#
+# The release is not gated on a human, so a bump that fails to build lands on
+# main and turns the matrix run red: publication is all or nothing, so the
+# previously published repository stays in place until the bump is fixed. That
+# is the trade for an update reaching clients without anyone shepherding it.
+
+on:
+  schedule:
+    # Daily, and off the hour: scheduled runs are queued behind everything else
+    # competing for a round slot.
+    - cron: '7 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Report what would change, without committing or releasing
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      # The bump commit and the tag, and the workflow_dispatch that releases
+      # them. A tag pushed with GITHUB_TOKEN would not start build.yml itself:
+      # an event created by that token does not trigger a workflow run, which is
+      # also why the commit landing on main here causes no second build.
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The full history, because the bump is rebased onto whatever main
+          # became while it was being computed, and a shallow clone cannot
+          # always replay a commit onto a moved tip.
+          fetch-depth: 0
+      - name: Resolve the newest stable release of every app
+        id: bump
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          log="$RUNNER_TEMP/update.log"
+          status=0
+          # The script prints one line per app - `current`, `updated` or `failed` -
+          # and writes the lockfile only if every app resolved, so a nonzero exit
+          # can never have left a half-finished bump behind. Keep the log: the
+          # `updated` lines are the release notes, and the `failed` lines are the
+          # only description of what went wrong.
+          python3 scripts/update-checksums.py >"$log" 2>&1 || status=$?
+          cat "$log"
+
+          if [ "$status" -ne 0 ]; then
+            # One unreachable repository, one rate limit, or one release whose tag
+            # disagrees with its own Cargo.toml. Fail rather than publish a bump
+            # that quietly omits an app, and name the app: a check that silently
+            # stops checking one app is worse than one that fails.
+            if grep -q '^failed ' "$log"; then
+              # Squeeze the script's column padding out of the annotation.
+              sed -n 's|^failed *\([^:]*\): *\(.*\)$|::error::\1: \2|p' "$log"
+            else
+              # The only other way to get here is the recipe generator the script
+              # runs after writing, which leaves the lockfile modified.
+              echo "::error::update-checksums.py exited $status without naming an" \
+                "app; the lockfile may be modified but uncommitted."
+            fi
+            echo "Nothing was committed, so the published repository is unchanged." \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          # The lockfile and the recipes are one change: the script regenerates
+          # the recipes itself, and build.yml fails a run whose recipes do not
+          # match its lockfile, so committing only half of it breaks the next
+          # build rather than this one.
+          git add -A config aports
+          echo "dry_run=${DRY_RUN:-false}" >> "$GITHUB_OUTPUT"
+
+          if git diff --cached --quiet -- config aports; then
+            echo "Every app is already at the newest stable upstream release." >> "$GITHUB_STEP_SUMMARY"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # The script's own "updated <app> <old> -> <new> (<fields>)" lines are
+          # the release notes for a repository release with no author to write
+          # them, so they are kept rather than reformatted. One file becomes both
+          # the commit message and the tag annotation, so the two cannot disagree
+          # about what a release contains. (`git commit` rejects -m together with
+          # -F, so the subject has to be in the file.)
+          note="$RUNNER_TEMP/release-note"
+          {
+            echo 'bump Craft apps to their newest upstream release'
+            echo
+            grep '^updated ' "$log" || true
+          } >"$note"
+          {
+            echo '### Upstream moved'
+            echo
+            echo '```'
+            tail -n +3 "$note"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+          if [ "$DRY_RUN" = true ]; then
+            git diff --cached --stat -- config aports >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Dry run: the changes above were left uncommitted."
+            exit 0
+          fi
+      - name: Commit, tag and release
+        if: steps.bump.outputs.changed == 'true' && steps.bump.outputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # An authenticated remote for every write: checkout was told not to
+          # persist credentials, so `origin` carries no token, and this works on
+          # a private repository too.
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -q -F "$RUNNER_TEMP/release-note"
+
+          # main may have moved while every tarball was being downloaded and
+          # hashed. Replay onto the new tip rather than clobbering it; a real
+          # conflict means a human bumped the same app, and is left to them.
+          branch="${GITHUB_REF_NAME}"
+          git fetch --quiet "$remote" \
+            "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+          if ! git rebase --quiet "refs/remotes/origin/${branch}"; then
+            git rebase --abort || true
+            echo "::error::main moved during this run and the bump conflicts with" \
+              "it. Run scripts/update-checksums.py on the new main and push the" \
+              "result; nothing was published."
+            exit 1
+          fi
+
+          # The NNth release of the current month: the highest existing tag for
+          # it, plus one. Counted from the remote rather than assumed, because
+          # this run is not the only thing allowed to tag this repository.
+          month="$(date -u +%Y.%m)"
+          prefix="v${month}."
+          highest=0
+          while read -r _ ref; do
+            name="${ref#refs/tags/}"
+            case "$name" in
+              "$prefix"[0-9]*) n="${name#"$prefix"}" ;;
+              *) continue ;;
+            esac
+            case "$n" in
+              '' | *[!0-9]*) continue ;;
+            esac
+            if (( 10#$n > highest )); then highest=$((10#$n)); fi
+          done < <(git ls-remote --tags "$remote")
+          tag="v${month}.$(printf '%02d' $((highest + 1)))"
+
+          git tag -a "$tag" -F "$RUNNER_TEMP/release-note"
+          # The branch first, then the tag, rather than one push carrying both:
+          # a server processes each ref on its own, so a single push whose branch
+          # update is rejected can still land the tag, releasing a commit that is
+          # not on main. Rejected here means main moved again inside the last few
+          # seconds; the commit is unreleased and the next run recomputes it.
+          if ! git push --quiet "$remote" "HEAD:refs/heads/${branch}"; then
+            echo "::error::main moved again between the rebase and the push, so" \
+              "the bump is unreleased. Nothing was published; the next run" \
+              "repeats this one."
+            exit 1
+          fi
+          # Pushing a tag that already exists at another commit is rejected rather
+          # than forced, so a concurrent tagger costs an error, not a rewritten
+          # release. main is current at that point, so the set is one hand-made tag
+          # or one weekly run away from being published.
+          git push --quiet "$remote" "refs/tags/${tag}"
+
+          # The tag alone would not start build.yml - see the permissions note -
+          # so ask for the run directly. Dispatched against the tag, not against
+          # main: build.yml reads `release` from the ref it was triggered on, and
+          # a run pinned to the tag publishes exactly what was tagged even if
+          # main moves again before the matrix starts. The workflow file itself
+          # lives on main, which is what makes it dispatchable at all.
+          gh api --silent \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/build.yml/dispatches" \
+            -f ref="$tag"
+          {
+            echo
+            echo "Tagged \`$tag\` and started **Build and publish apps** for it."
+            echo
+            echo "Until that run publishes, clients still get the previous" \
+              "repository; it replaces the whole thing on success and leaves it" \
+              "alone on failure."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"

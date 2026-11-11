@@ -25,6 +25,15 @@ url="https://www.chromium.org/Home"
 # armv7: OOMs on linking on builders
 arch="aarch64 x86_64"
 license="BSD-3-Clause"
+# ## NOTE: keep the dependency lists below free of '#' comments. abuild does not
+# source the APKBUILD's lists as shell comments - it word-splits the string and
+# hands every word to apk - so a comment inside depends= or makedepends= becomes
+# a package name and deps fails on the first word apk cannot parse.
+#
+# ## NOTE: papirus-icon-theme is a runtime dependency because the desktop file
+# uses Icon=web-browser, which Papirus ships as a full-colour SVG in every fixed
+# size plus a symbolic variant. That is the icon the user sees; the hicolor PNGs
+# installed below are only a fallback for themes that do not know the name.
 depends="
 	$pkgname-common=$pkgver-r$pkgrel
 	font-opensans
@@ -33,14 +42,13 @@ depends="
 	mesa-dri-gallium
 	musl>=1.2.3_git20230322-r0
 	so:libudev.so.1
-	# ## NOTE: the desktop file uses Icon=web-browser, which Papirus ships as a
-	# full-colour SVG in every fixed size plus a symbolic variant. That is the
-	# icon the user sees; the hicolor PNGs installed below are only a fallback
-	# for themes that do not know the name.
 	papirus-icon-theme
 	xdg-utils
 	"
 _llvmver=22
+# ## NOTE: patch is in the list below because ungoogled's utils/patches.py
+# shells out to GNU patch. Alpine gets it for free via abuild, but we list it
+# explicitly anyway.
 makedepends="
 	alsa-lib-dev
 	bash
@@ -108,8 +116,6 @@ makedepends="
 	nss-dev
 	openh264-dev
 	opus-dev
-	# ## NOTE: ungoogled's utils/patches.py shells out to GNU patch. Alpine
-	# gets it for free via abuild, but list it explicitly anyway.
 	patch
 	pciutils-dev
 	perl

@@ -64,6 +64,7 @@ scripts/gen-app-recipes.py       renders the Craft APKBUILDs from the lockfile
 scripts/update-checksums.py      bumps the lockfile to the newest upstream release
 scripts/collect-packages.py      turns workflow artifacts back into out/packages/<arch>/
 .github/workflows/build.yml      build every package, then publish the repository
+.github/workflows/update.yml     daily: bump the lockfile and release if upstream moved
 ```
 
 The fifteen Craft recipes are generated, not hand-written: `config/apps.lock.json`
@@ -123,22 +124,40 @@ See [docs/adding-an-app.md](docs/adding-an-app.md) for the details.
 
 ## Releasing
 
-Push a tag `v<major>.<minor>.<patch>` and the workflow builds every package for
-every architecture and publishes the result to GitHub Pages. The weekly schedule
-and a manual run do the same thing without the tag. A push to `main` or a pull
-request builds `x86_64` only and does not publish: it is the cheap check that the
-recipes and the index still work, and a pull request from a fork could not read
-the signing key anyway - publishing with a different one would lock existing
-clients out. Publishing replaces the whole repository, so it only ever happens
-from a run that built every architecture.
+Every day, `.github/workflows/update.yml` runs `scripts/update-checksums.py`. If
+no app moved, that is the end of it. If any did, the workflow commits the new
+lockfile and its regenerated recipes to `main`, tags the commit, and starts a
+release of it - so an upstream release becomes a package here without anyone
+noticing it first.
+
+Tags are dates, not versions: `v<year>.<month>.<number-in-month>`. No single
+number describes fifteen apps, and the build workflow only requires a tag that
+looks like `v<major>.<minor>.<patch>`, which that satisfies. Pushing such a tag
+by hand releases whatever it points at, so a hand-made tag is still the way to
+rebuild an existing set of versions. The weekly schedule and a manual run build
+and publish the current `main` without a tag. A push to `main` or a pull request
+builds `x86_64` only and does not publish: it is the cheap check that the recipes
+and the index still work, and a pull request from a fork could not read the
+signing key anyway - publishing with a different one would lock existing clients
+out. Publishing replaces the whole repository, so it only ever happens from a run
+that built every architecture.
+
+The automatic bump has no review step, so the trade is that a bad bump turns the
+matrix run red rather than a pull request yellow. What limits the damage is that
+releasing and publishing are separate: a bump whose build fails leaves the
+previously published repository in place, and the tag stays as the record of what
+was attempted. Nothing retries on its own - the lockfile is already current, so
+the next day's check finds nothing to do - which means a red release run is the
+thing to watch, and fixing the recipe and re-tagging is a human job. If upstream
+is unreachable, or one app's release turns out to be mis-tagged, the update
+workflow fails without committing anything, naming the app.
 
 Publication is all or nothing: one failing shard fails the build stage, which
-skips `publish` and leaves the previously published repository in place. Shards do
-not cancel each other (`fail-fast: false`), so a run reports every architecture
-that is broken rather than the first one. A run that would publish but cannot read
-the signing key fails in the first job, before any package is built, because
-packages are signed as they are built and the index will not describe one it cannot
-verify.
+skips `publish`. Shards do not cancel each other (`fail-fast: false`), so a run
+reports every architecture that is broken rather than the first one. A run that
+would publish but cannot read the signing key fails in the first job, before any
+package is built, because packages are signed as they are built and the index will
+not describe one it cannot verify.
 
 See [docs/browser.md](docs/browser.md) for the Chromium pipeline and how to bump
 it, and [docs/adding-an-app.md](docs/adding-an-app.md) to add or update a package.
