@@ -1,0 +1,38 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=lightcraft
+pkgver=0.20.0
+pkgrel=0
+pkgdesc="Organise photos and develop raw files, non-destructively"
+url="https://getartcraft.com/apps/lightcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="lightcraft-0.20.0.tar.gz::https://github.com/storytold/lightcraft/archive/refs/tags/v0.20.0.tar.gz"
+builddir="$srcdir/lightcraft-0.20.0"
+_craft_app="lightcraft"
+_craft_bins="lightcraft lightcraft-cli"
+_craft_features="lightcraft/heif lightcraft-cli/heif"
+. "$startdir/../craft-common.sh"
+sha512sums="
+3aa837b7d9b0e40619785d32daa7c99d94314c02440fa7dbda29644eb00362beda25b5e440021a7d876b2fb273936e007e76df8c89c10b9a70906add4a588725  lightcraft-0.20.0.tar.gz
+"

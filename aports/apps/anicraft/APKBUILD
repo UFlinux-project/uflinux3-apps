@@ -1,0 +1,39 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=anicraft
+pkgver=0.1.0
+pkgrel=0
+pkgdesc="Draw and animate 2D vector art on a timeline"
+url="https://getartcraft.com/apps/anicraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	alsa-lib-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	alsa-lib
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="anicraft-0.1.0.tar.gz::https://github.com/storytold/anicraft/archive/refs/tags/v0.1.0.tar.gz"
+builddir="$srcdir/anicraft-0.1.0"
+_craft_app="anicraft"
+_craft_bins="anicraft anicraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+a68d6a893b0af5c77cc1a9a4e9134a22d4088f07adf442d7ec33395e1fae952fb2e753f3616f984645a1b8526e43f8d98b498dc3276ab583ec4d03f4bf779277  anicraft-0.1.0.tar.gz
+"

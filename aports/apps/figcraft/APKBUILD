@@ -1,0 +1,39 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=figcraft
+pkgver=0.17.0
+pkgrel=0
+pkgdesc="Design and prototype user interfaces"
+url="https://getartcraft.com/apps/figcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	fontconfig-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	fontconfig
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="figcraft-0.17.0.tar.gz::https://github.com/storytold/figcraft/archive/refs/tags/v0.17.0.tar.gz"
+builddir="$srcdir/figcraft-0.17.0"
+_craft_app="figcraft"
+_craft_bins="figcraft figcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+8587ec6aa7e919e226f33194a702b895a7067f41627b2c21fc346e5fed44c63fdbd4439e9f91d645f18ceba4a4507ac0f745316c58a8b0abfb1a0ad962de84b2  figcraft-0.17.0.tar.gz
+"

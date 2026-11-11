@@ -1,0 +1,39 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=deckcraft
+pkgver=0.17.0
+pkgrel=0
+pkgdesc="Create and present slide decks"
+url="https://getartcraft.com/apps/deckcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	alsa-lib-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	alsa-lib
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="deckcraft-0.17.0.tar.gz::https://github.com/storytold/deckcraft/archive/refs/tags/v0.17.0.tar.gz"
+builddir="$srcdir/deckcraft-0.17.0"
+_craft_app="deckcraft"
+_craft_bins="deckcraft deckcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+74edccf8573b48ab9ab1096c707a3c0f0c9d0d12ac09fe34012ef3edcbc329b8a81a0a5092940743a0f8a750614af7f3064da39c074c41540f129eda041cafab  deckcraft-0.17.0.tar.gz
+"

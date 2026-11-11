@@ -1,0 +1,37 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=vectorcraft
+pkgver=0.23.0
+pkgrel=0
+pkgdesc="Draw and edit vector illustrations, SVG and PDF"
+url="https://getartcraft.com/apps/vectorcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="vectorcraft-0.23.0.tar.gz::https://github.com/storytold/vectorcraft/archive/refs/tags/v0.23.0.tar.gz"
+builddir="$srcdir/vectorcraft-0.23.0"
+_craft_app="vectorcraft"
+_craft_bins="vectorcraft vectorcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+593777ea1016561d022d6e652a1d1aaaea819b9ee4bb3f28cd2aba87a43bfb11e909396c11ef256819ed7797ead06fec7c867a6a3deb1e42a7d66c827145da7a  vectorcraft-0.23.0.tar.gz
+"

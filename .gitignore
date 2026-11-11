@@ -1,0 +1,8 @@
+# Build state, caches and output: all of it disposable, none of it committed.
+/state/
+/.state/
+/.cache/
+/.spool/
+/out/
+__pycache__/
+*.pyc

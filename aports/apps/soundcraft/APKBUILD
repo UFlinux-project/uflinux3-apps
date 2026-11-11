@@ -1,0 +1,43 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=soundcraft
+pkgver=0.19.0
+pkgrel=0
+pkgdesc="Record, edit and mix audio and MIDI"
+url="https://getartcraft.com/apps/soundcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	alsa-lib-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	alsa-lib
+	"
+subpackages="
+	$pkgname-doc
+	$pkgname-bash-completion
+	$pkgname-zsh-completion
+	$pkgname-fish-completion
+	"
+source="soundcraft-0.19.0.tar.gz::https://github.com/storytold/soundcraft/archive/refs/tags/v0.19.0.tar.gz"
+builddir="$srcdir/soundcraft-0.19.0"
+_craft_app="soundcraft"
+_craft_bins="soundcraft soundcraft-cli"
+_craft_man=yes
+. "$startdir/../craft-common.sh"
+sha512sums="
+5895e03fb6d46ae8537ff15d95ac87e87a3c42b85210941bcd12e3c4a0cc9777dd94ca9eacf648db81326282ffdcdda635dd32c3fa14f2b62f9ec9a4b44957d9  soundcraft-0.19.0.tar.gz
+"

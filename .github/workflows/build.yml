@@ -1,0 +1,228 @@
+name: Build and publish apps
+
+# Every package is built in its own shard: an Alpine chroot unpacked from a
+# locked minirootfs, created, used and thrown away by scripts/build.py. What is
+# published is the APK repository itself, served by GitHub Pages out of
+# out/pages, so no commit step or extra branch is involved.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+  schedule:
+    # Weekly rebuild, so a new Alpine point release or a new upstream release
+    # shows up without anyone having to remember.
+    - cron: '30 4 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  checks:
+    runs-on: ubuntu-26.04
+    outputs:
+      packages: ${{ steps.matrix.outputs.packages }}
+      full: ${{ steps.matrix.outputs.full }}
+      release: ${{ steps.matrix.outputs.release }}
+      epoch: ${{ steps.matrix.outputs.epoch }}
+      cache: ${{ steps.matrix.outputs.cache }}
+      repository: ${{ steps.matrix.outputs.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate shell, Python and this workflow
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y shellcheck busybox-static
+          # Every shell file we ship, found rather than globbed: the recipes, the
+          # helper they source (which sits beside the package directories, not
+          # inside one, so `aports/apps/*/*.sh` misses it), and the scripts a
+          # recipe installs rather than sources. The prunes keep a local build's
+          # unpacked source tree out of the way: on CI it does not exist, but the
+          # same command should be runnable after building in place.
+          mapfile -t shell_files < <(
+            find aports scripts \
+              \( -name src -o -name pkg -o -name tmp \) -prune -o \
+              \( -name '*.sh' -o -name APKBUILD \) -print | sort
+          )
+          echo "Checking ${#shell_files[@]} shell files"
+          shellcheck -S warning "${shell_files[@]}"
+          # abuild runs recipes with ash, which is stricter than the runner's sh:
+          # ${var^^} and friends parse fine under bash and fail mid-build.
+          for file in "${shell_files[@]}"; do
+            busybox ash -n "$file"
+          done
+          for script in scripts/*.py; do python3 -m py_compile "$script"; done
+          go install github.com/rhysd/actionlint/cmd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca
+          "$(go env GOPATH)/bin/actionlint" -config-file .github/actionlint.yaml .github/workflows/build.yml
+      - name: Check that generated recipes are committed
+        run: |
+          python3 scripts/gen-app-recipes.py
+          # git status, not git diff: adding an app to the lockfile without
+          # committing its new recipe produces an untracked file, which a diff
+          # does not see, and the failure would otherwise surface 107 times as
+          # "APKBUILD: No such file or directory".
+          git add -A aports
+          git diff --cached --quiet -- aports || {
+            echo 'recipes are stale or missing, run: python3 scripts/gen-app-recipes.py' >&2
+            git status --short -- aports
+            exit 1
+          }
+      - name: Check that the lockfile tracks upstream
+        # Informational, and deliberately not fatal: a release published
+        # yesterday is not a defect in the change being built, and it must not
+        # hold up publication of everything else. The weekly schedule run is
+        # where this annotation is meant to show up. A hash that is simply wrong
+        # is caught by abuild during the build, not here.
+        run: python3 scripts/update-checksums.py --check ||
+          echo "::warning::config/apps.lock.json is behind upstream, run scripts/update-checksums.py"
+      - id: matrix
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+        run: python3 scripts/ci-matrix.py
+      - name: Check that a run which publishes can sign
+        # Fail here rather than after 107 builds: without the key every shard
+        # generates its own throwaway, the index then rejects every APK as
+        # "BAD signature", and the run that discovers this is the expensive one.
+        # A tag pushed to a fork is the case this catches. The secrets are read
+        # through env, because the secrets context is not available in `if`.
+        if: steps.matrix.outputs.full == 'true'
+        env:
+          PRIVATE: ${{ secrets.APK_SIGNING_PRIVATE_KEY }}
+          PUBLIC: ${{ secrets.APK_SIGNING_PUBLIC_KEY }}
+        run: |
+          if [ -z "$PRIVATE" ] || [ -z "$PUBLIC" ]; then
+            echo "::error::This run would publish, but APK_SIGNING_PRIVATE_KEY" \
+              "and APK_SIGNING_PUBLIC_KEY are not set, so the repository could" \
+              "not be signed with the key UFLinux trusts."
+            exit 1
+          fi
+
+  compile:
+    needs: checks
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJSON(needs.checks.outputs.packages) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 350
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.checks.outputs.epoch }}
+      # abuild signs every APK it produces, and `apk index` refuses to describe a
+      # package whose signature it cannot verify. The index happens in a different
+      # job, so the key has to be the same one here - without these secrets each
+      # shard generates its own throwaway key and the index job fails with
+      # "BAD signature" on every APK. A pull request from a fork cannot read them,
+      # and gets throwaway keys; that run does not publish either.
+      APK_SIGNING_PRIVATE_KEY: ${{ secrets.APK_SIGNING_PRIVATE_KEY }}
+      APK_SIGNING_PUBLIC_KEY: ${{ secrets.APK_SIGNING_PUBLIC_KEY }}
+      # No CARGO_BUILD_JOBS here: build.py compares the target architecture
+      # against the runner's own `uname -m`, which is the same fact
+      # `matrix.emulated` is derived from, and it also knows what to do about the
+      # single-threaded final link that emulation makes expensive. Keeping the
+      # rule in one place is what keeps the two from disagreeing.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare architecture emulation
+        if: matrix.emulated == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y qemu-user-binfmt binfmt-support
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache
+        with:
+          path: .cache/build/${{ matrix.arch }}
+          key: apps-v1-${{ matrix.arch }}-${{ matrix.package }}-${{ needs.checks.outputs.cache }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            apps-v1-${{ matrix.arch }}-${{ matrix.package }}-${{ needs.checks.outputs.cache }}-
+      - name: Build
+        run: |
+          timeout --signal=INT --kill-after=60s 330m \
+            sudo --preserve-env=SOURCE_DATE_EPOCH,CARGO_BUILD_JOBS,APK_SIGNING_PRIVATE_KEY,APK_SIGNING_PUBLIC_KEY \
+            python3 scripts/build.py --arch '${{ matrix.arch }}' \
+              --package '${{ matrix.package }}' --stage packages
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        if: always()
+        with:
+          path: .cache/build/${{ matrix.arch }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: apk-${{ matrix.arch }}-${{ matrix.package }}
+          path: out/packages/${{ matrix.arch }}
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+
+  publish:
+    # Gate on ci-matrix.py's own decision rather than a copy of it: publishing
+    # replaces the whole repository, so it may only happen from a run that built
+    # every architecture - a push to the watched branch builds x86_64 alone and
+    # would otherwise deploy a site missing the other six. A pull request cannot
+    # sign the result anyway, and deploying with an ephemeral key would lock
+    # every client out. Forks still get every package built on x86_64.
+    if: needs.checks.outputs.full == 'true'
+    needs: [checks, compile]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: release-publication
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # merge-multiple stays off, so every artifact keeps its own directory and
+      # collect-packages.py can read the architecture back out of its name.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: apk-*
+          path: .spool
+      - name: Sort packages into their architecture
+        run: python3 scripts/collect-packages.py
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        id: pages
+      - name: Index and sign the repository
+        env:
+          SOURCE_DATE_EPOCH: ${{ needs.checks.outputs.epoch }}
+          APK_SIGNING_PRIVATE_KEY: ${{ secrets.APK_SIGNING_PRIVATE_KEY }}
+          APK_SIGNING_PUBLIC_KEY: ${{ secrets.APK_SIGNING_PUBLIC_KEY }}
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          sudo --preserve-env=SOURCE_DATE_EPOCH,APK_SIGNING_PRIVATE_KEY,APK_SIGNING_PUBLIC_KEY,PAGES_BASE_URL \
+            python3 scripts/build.py --stage index
+      - name: Summary
+        env:
+          RELEASE: ${{ needs.checks.outputs.release }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+          REPOSITORY: ${{ needs.checks.outputs.repository }}
+        run: |
+          {
+            echo "### $(find out/pages -name '*.apk' | wc -l) packages, $(find out/pages -name APKINDEX.tar.gz | wc -l) architectures"
+            echo
+            echo "Published \`$BASE_URL/$REPOSITORY\` (release=$RELEASE)."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: out/pages
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

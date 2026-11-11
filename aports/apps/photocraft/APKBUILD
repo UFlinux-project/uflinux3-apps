@@ -1,0 +1,50 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=photocraft
+pkgver=0.22.0
+pkgrel=0
+pkgdesc="Edit photos and layered PSD documents"
+url="https://getartcraft.com/apps/photocraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	fontconfig-dev
+	pipewire-dev
+	mesa-dev
+	libdrm-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	fontconfig
+	pipewire-libs
+	mesa-gbm
+	libdrm
+	"
+subpackages="
+	$pkgname-doc
+	$pkgname-bash-completion
+	$pkgname-zsh-completion
+	$pkgname-fish-completion
+	"
+source="photocraft-0.22.0.tar.gz::https://github.com/storytold/photocraft/archive/refs/tags/v0.22.0.tar.gz"
+builddir="$srcdir/photocraft-0.22.0"
+_craft_app="photocraft"
+_craft_bins="photocraft photocraft-cli"
+_craft_features="heif"
+_craft_man=yes
+. "$startdir/../craft-common.sh"
+sha512sums="
+bf48fc6f4b9c5085a2eec870d7e89fc56285207060cdbdf33a07bf92ea24f6d0d6f08b2c3fa33dcbd8d2347e1cf38c13ce320e98a9120406a5794a217cfd665b  photocraft-0.22.0.tar.gz
+"

@@ -1,0 +1,5 @@
+# actionlint's built-in label list can lag GitHub's published runner list.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
+    - ubuntu-26.04-arm

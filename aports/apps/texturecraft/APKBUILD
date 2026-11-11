@@ -1,0 +1,37 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=texturecraft
+pkgver=0.5.0
+pkgrel=0
+pkgdesc="Paint PBR textures directly on 3D meshes"
+url="https://getartcraft.com/apps/texturecraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="texturecraft-0.5.0.tar.gz::https://github.com/storytold/texturecraft/archive/refs/tags/v0.5.0.tar.gz"
+builddir="$srcdir/texturecraft-0.5.0"
+_craft_app="texturecraft"
+_craft_bins="texturecraft texturecraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+a2fb1640caa48359ab3f7b70430ca32a911e5b7a50582d4f3e6361bff600faaf3ff591664755334c626d7fe5b8cbc2eca2333584eb8838a80152bcedcf01abbf  texturecraft-0.5.0.tar.gz
+"

@@ -1,0 +1,42 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=filmcraft
+pkgver=0.19.0
+pkgrel=0
+pkgdesc="Edit video, color and sound"
+url="https://getartcraft.com/apps/filmcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	alsa-lib-dev
+	gtk+3.0-dev
+	glib-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	alsa-lib
+	gtk+3.0
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="filmcraft-0.19.0.tar.gz::https://github.com/storytold/filmcraft/archive/refs/tags/v0.19.0.tar.gz"
+builddir="$srcdir/filmcraft-0.19.0"
+_craft_app="filmcraft"
+_craft_bins="filmcraft filmcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+93861de15103db30b773baf5ee66ac937082066e68e5d327e7a3fb3404c44e7457506ec599515bbf62c75ad3120ee7370e465ebbf3a5371c797534f5ca1d0ba7  filmcraft-0.19.0.tar.gz
+"

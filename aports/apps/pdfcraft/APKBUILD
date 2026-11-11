@@ -1,0 +1,37 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=pdfcraft
+pkgver=0.20.0
+pkgrel=0
+pkgdesc="Read, organize, combine, split and secure PDFs"
+url="https://getartcraft.com/apps/pdfcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="pdfcraft-0.20.0.tar.gz::https://github.com/storytold/pdfcraft/archive/refs/tags/v0.20.0.tar.gz"
+builddir="$srcdir/pdfcraft-0.20.0"
+_craft_app="pdfcraft"
+_craft_bins="pdfcraft pdfcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+2324190c3c8e3b3eda4ba73e82c12191cb275e7ff40a916af89714d6ebd364a94ad4cd31731bf4e7627506205e11a68b1f7ca3315410739943cd3551e4da3b71  pdfcraft-0.20.0.tar.gz
+"

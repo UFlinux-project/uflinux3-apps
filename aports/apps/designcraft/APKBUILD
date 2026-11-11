@@ -1,0 +1,37 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=designcraft
+pkgver=0.19.0
+pkgrel=0
+pkgdesc="Lay out magazines, books and print documents"
+url="https://getartcraft.com/apps/designcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="designcraft-0.19.0.tar.gz::https://github.com/storytold/designcraft/archive/refs/tags/v0.19.0.tar.gz"
+builddir="$srcdir/designcraft-0.19.0"
+_craft_app="designcraft"
+_craft_bins="designcraft designcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+541ae2a7a49982c014db4d103c912d79a4ea4cd79dee5ebc662c6fa349ebc9a9f42528bbc7f477ea306d164bbe7830b24810ac2d5c7fed6a10d72477f341429f  designcraft-0.19.0.tar.gz
+"

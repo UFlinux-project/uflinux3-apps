@@ -1,0 +1,39 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=wordcraft
+pkgver=0.17.0
+pkgrel=0
+pkgdesc="Write and design documents; open and save Word files"
+url="https://getartcraft.com/apps/wordcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	fontconfig-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	fontconfig
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="wordcraft-0.17.0.tar.gz::https://github.com/storytold/wordcraft/archive/refs/tags/v0.17.0.tar.gz"
+builddir="$srcdir/wordcraft-0.17.0"
+_craft_app="wordcraft"
+_craft_bins="wordcraft wordcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+70c2735903596ffe1492390e53a67688ded262afa74a68ac049626c03db64cf291efcceb47860d9acec06e9e254f1ea73f2815e39e7489ab309dddb349f25681  wordcraft-0.17.0.tar.gz
+"

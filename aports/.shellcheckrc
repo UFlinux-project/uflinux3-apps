@@ -1,0 +1,5 @@
+# APKBUILDs are sourced by abuild (busybox ash), not executed, so they have no
+# shebang and every abuild-provided variable looks "unused" or "unset" to
+# shellcheck. `local` is undefined in POSIX sh but is supported by ash, which is
+# what abuild actually uses (see the `busybox ash -n` check in CI).
+disable=SC1091,SC2034,SC2148,SC2154,SC3043

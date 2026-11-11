@@ -1,0 +1,39 @@
+# Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
+pkgname=effectcraft
+pkgver=0.23.1
+pkgrel=0
+pkgdesc="Motion graphics and visual effects compositor"
+url="https://getartcraft.com/apps/effectcraft"
+arch="all"
+license="Apache-2.0"
+# Upstream resolves git dependencies (craft-libs, egui, winit forks) that have no
+# crates.io tarballs, so the build cannot be offline.
+options="net !check"
+makedepends="
+	cargo
+	rust
+	git
+	cmake
+	samurai
+	perl
+	desktop-file-utils
+	appstream
+	alsa-lib-dev
+	"
+depends="
+	wayland-libs-egl
+	hicolor-icon-theme
+	shared-mime-info
+	alsa-lib
+	"
+subpackages="
+	$pkgname-doc
+	"
+source="effectcraft-0.23.1.tar.gz::https://github.com/storytold/effectcraft/archive/refs/tags/v0.23.1.tar.gz"
+builddir="$srcdir/effectcraft-0.23.1"
+_craft_app="effectcraft"
+_craft_bins="effectcraft effectcraft-cli"
+. "$startdir/../craft-common.sh"
+sha512sums="
+99b0643e5c3aeb1bf5449de55ec8986aaf2c98b52fe7719b22178bec07d72ea789a9cc22c6f832f4666b9a6dfec19ae839070f57927700802a16ad0863c1f3a2  effectcraft-0.23.1.tar.gz
+"
