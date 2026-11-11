@@ -16,7 +16,7 @@ published site):
 
 ```sh
 REPO="https://UFlinux-project.github.io/uflinux3-apps/apk/v3.24/uflinux-apps"
-doas wget -qO /etc/apk/keys/uflinux3.rsa.pub "$REPO/uflinux3.rsa.pub"
+doas wget -qO /etc/apk/keys/uflinux3.ec384.pub "$REPO/uflinux3.ec384.pub"
 # apk reads top-level *.list files from this directory, but no package creates it.
 doas mkdir -p /etc/apk/repositories.d
 printf '%s\n' "$REPO" | doas tee /etc/apk/repositories.d/uflinux-apps.list >/dev/null
@@ -24,10 +24,14 @@ doas apk update
 doas apk add photocraft web-browser
 ```
 
-The signing key is the same keypair UFLinux itself uses, so adding this
-repository does not introduce a second root of trust. `config/repository.json`
-records the key id, the Alpine version the packages are built against, and the
-path the repository is published under.
+Packages are signed with an ECDSA key over P-384, the same keypair UFLinux itself
+uses, so adding this repository does not introduce a second root of trust. The
+member carrying the signature is still named `.SIGN.RSA256.`: apk-tools takes the
+digest from that name and the only one it accepts there is SHA-256, which an EC key
+signs fine - see the `sigtype` comment in `scripts/build.py`. The key file is a
+bare armoured public key, not a certificate; apk has no certificate chain to
+validate. `config/repository.json` records the key id, the Alpine version the
+packages are built against, and the path the repository is published under.
 
 ## What is here
 

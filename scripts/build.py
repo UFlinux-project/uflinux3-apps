@@ -103,6 +103,13 @@ class Build:
             "TERM": "dumb",
             "TZ": "UTC",
             "LC_ALL": "C.UTF-8",
+            # abuild-sign accepts only RSA (SHA-1) and RSA256 (SHA-256) and
+            # files the signature as .SIGN.<that>.<key id>. apk-tools 3.0.9 does
+            # verify an EC signature, but it derives the digest from that member
+            # name: measured on Alpine 3.24, SHA-256 is accepted and SHA-1,
+            # SHA-384 and SHA-512 are all rejected as UNTRUSTED. So an EC key
+            # has to be signed with SHA-256 under this misleading name, and
+            # "RSA256" here means "ECDSA with a SHA-256 digest", not the key.
             "sigtype": "RSA256",
             # Keep downloads and Cargo state out of the recipe directory so an
             # Actions cache can restore them between runs.
@@ -267,7 +274,10 @@ class Build:
         in_root = "/var/lib/uflinux-apps/keys"
         directory = self.root / in_root.lstrip("/")
         directory.mkdir(parents=True, exist_ok=True, mode=0o700)
-        private = directory / Path(self.key).stem          # <id>.rsa
+        # abuild-sign derives the public key name by appending ".pub" to the
+        # private one, so the two have to be <key id> and <key id>.pub.
+        private = directory / Path(self.key).stem
+        private_in_root = in_root + "/" + Path(self.key).stem
         public = directory / self.key
         release = os.environ.get("APK_SIGNING_PRIVATE_KEY", "")
         if release:
@@ -282,16 +292,22 @@ class Build:
                 stream.write(release.strip() + "\n")
             # -pubout is not optional: `openssl pkey -in` prints the *private*
             # key by default, which can never equal a public key, so without it
-            # this check rejects a perfectly good keypair.
-            actual = self.chroot("openssl", "pkey", "-pubout", "-in",
-                                 in_root + "/" + Path(self.key).stem,
+            # this check rejects a perfectly good keypair. `pkey` is also what
+            # makes this check work for any algorithm, EC included.
+            actual = self.chroot("openssl", "pkey", "-pubout", "-in", private_in_root,
                                  stdout=subprocess.PIPE).stdout.decode().strip()
             if actual != expected:
                 raise RuntimeError("The release public and private signing keys do not match")
             public.write_text(expected + "\n")
         elif not private.exists():
-            self.chroot("openssl", "genrsa", "-out", in_root + "/" + Path(self.key).stem, "3072")
-            result = self.chroot("openssl", "rsa", "-in", in_root + "/" + Path(self.key).stem,
+            # P-384. abuild-keygen cannot generate this key, because it only ever
+            # runs `openssl genrsa`, so the throwaway has to be made here. The
+            # public half goes through `pkey -pubout` rather than `ec`, so the
+            # file is a SubjectPublicKeyInfo like any other, which is the one
+            # shape apk reads from /etc/apk/keys.
+            self.chroot("openssl", "ecparam", "-name", "secp384r1", "-genkey",
+                        "-noout", "-out", private_in_root)
+            result = self.chroot("openssl", "pkey", "-in", private_in_root,
                                  "-pubout", stdout=subprocess.PIPE)
             public.write_bytes(result.stdout)
         os.chown(directory, owner, owner)
@@ -299,7 +315,7 @@ class Build:
         private.chmod(0o600)
         public.chmod(0o644)
         shutil.copy2(public, self.root / "etc/apk/keys" / self.key)
-        self.env.update(PACKAGER_PRIVKEY=in_root + "/" + Path(self.key).stem,
+        self.env.update(PACKAGER_PRIVKEY=private_in_root,
                         PACKAGER_PUBKEY=in_root + "/" + self.key)
         return public
 
@@ -320,7 +336,7 @@ class Build:
             self.chroot("install", "-d", "-o", "builder", "-g", "builder", "/home/builder/packages", "/home/builder/.abuild")
             self.write("home/builder/.abuild/abuild.conf",
                        f'PACKAGER="{CONFIG["packager"]}"\n'
-                       f'PACKAGER_PRIVKEY="/var/lib/uflinux-apps/keys/{Path(self.key).stem}"\n'
+                       f'PACKAGER_PRIVKEY="{self.env["PACKAGER_PRIVKEY"]}"\n'
                        f'PACKAGER_PUBKEY="/var/lib/uflinux-apps/keys/{self.key}"\n')
             jobs = os.environ.get("CARGO_BUILD_JOBS", "")
             # Under qemu-user, the compile job count and the final link are the
@@ -440,6 +456,8 @@ class Build:
                         "BAD signature, the APKs were built with a different "
                         "signing key than the one in APK_SIGNING_PRIVATE_KEY - "
                         "the build job needs the same secrets as the index job.")
+                # See the `sigtype` comment: RSA256 is the SHA-256 digest, and
+                # the only one apk will accept from an EC key.
                 self.chroot("abuild-sign", "-t", "RSA256", relative + "/APKINDEX.tar.gz")
                 final = self.repository / directory.name
                 if final.exists():

@@ -182,8 +182,14 @@ GitHub Pages has to be enabled for the repository, with the workflow as the
 source. The workflow needs two secrets, both copied from the UFLinux repository,
 so this repository signs with the key UFLinux already trusts:
 
-- `APK_SIGNING_PRIVATE_KEY` — the contents of `signing/uflinux3.rsa`
-- `APK_SIGNING_PUBLIC_KEY` — the contents of `signing/uflinux3.rsa.pub`
+- `APK_SIGNING_PRIVATE_KEY` — the contents of `signing/uflinux3.ec384`
+- `APK_SIGNING_PUBLIC_KEY` — the contents of `signing/uflinux3.ec384.pub`
+
+An ECDSA keypair over P-384, not RSA: `openssl ecparam -name secp384r1 -genkey
+-noout` for the private half, `openssl pkey -pubout` for the public one.
+`abuild-keygen` cannot make this key, since it only ever runs `openssl genrsa`.
+The signature member is still named `.SIGN.RSA256.` whatever the key type, because
+apk-tools derives the required digest from that name and accepts only SHA-256.
 
 Both jobs need them, not just the one that publishes. abuild signs every package
 it builds and `apk index` verifies each package's own signature before it will

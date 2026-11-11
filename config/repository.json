@@ -9,7 +9,7 @@
   "origin": "uflinux-apps",
   "repository_path": "apk/v3.24/uflinux-apps",
   "browser_arches": ["x86_64", "aarch64"],
-  "signing_key_id": "uflinux3.rsa.pub",
+  "signing_key_id": "uflinux3.ec384.pub",
   "packager": "uflinux3-apps contributors <noreply@uflinux.org>",
   "rootfs": {
     "x86": { "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86/alpine-minirootfs-3.24.4-x86.tar.gz", "sha512": "b5f37b12553148c6b5523e5c5a254c8a92e973dae5aac7d6e94bae1db72a99ab2c8239a4cd13e01c31254150eb765c7aa9bf392665925a93f57ab5adab387935" },
