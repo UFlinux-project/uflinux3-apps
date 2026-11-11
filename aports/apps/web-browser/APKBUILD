@@ -181,6 +181,7 @@ source="
 	typescript_native_preview.patch.noauto
 	web-browser-launcher.sh
 	web-browser.conf
+	uflinux3-web-browser.json
 	0001-hotfix-ignore-a-new-warning-in-rust-1.89.patch
 	compiler.patch
 	disable-dns_config_service.patch
@@ -528,6 +529,14 @@ _configure() {
 	# Alpine's gn_config with ungoogled's flags.gn merged in: the Google API
 	# keys are emptied, enable_hangout_services_extension flips to false, and
 	# the keys only ungoogled sets are added in place.
+	#
+	# use_v4l2_codec=true turns on Chromium's experimental Video4Linux2 hardware
+	# codec backend (media/gpu/v4l2). It is compiled alongside VA-API, not instead
+	# of it: which one a decode uses is chosen at runtime by the
+	# kPreferV4L2VideoAcceleration feature, which is disabled by default, so VA-API
+	# stays preferred and V4L2 is opt-in (--enable-features=PreferV4L2VideoAcceleration).
+	# No new build dependency: the backend only needs libdrm (unbundled above),
+	# in-tree libyuv/libgav1, and linux/videodev2.h from linux-headers.
 	# shellcheck disable=2089
 	local gn_config="
 		blink_enable_generated_code_formatting=false
@@ -582,8 +591,9 @@ _configure() {
 		use_safe_libstdcxx=false
 		use_system_libffi=true
 		use_sysroot=false
-		use_thin_lto=false
+		use_thin_lto=true
 		use_unofficial_version_number=false
+		use_v4l2_codec=true
 		use_vaapi=$vaapi
 		v8_drumbrake_bounds_checks=true
 		v8_use_metagen_instance_types=false
@@ -675,6 +685,16 @@ package() {
 
 	install -Dm644 "$srcdir"/web-browser.conf \
 		-t "$pkgdir"/etc/$pkgname/
+
+	# ## NOTE: default enterprise policy (Memory Saver on maximum, extended
+	# preloading, and the two Web Store extensions installed by default). The
+	# browser build reads policies from /etc/chromium/policies
+	# (components/policy/core/common/policy_paths.cc), whose recommended/
+	# subdir is POLICY_LEVEL_RECOMMENDED (config_dir_policy_loader.cc) -- these
+	# are defaults the user can still override, unlike managed/. The namespaced
+	# file name keeps it clear of Alpine's own chromium package.
+	install -Dm644 "$srcdir"/uflinux3-web-browser.json \
+		-t "$pkgdir"/etc/chromium/policies/recommended/
 
 	for pak in locales/*.pak *.pak; do
 		install -Dm644 "$pak" "$pkgdir"/usr/lib/$pkgname/"$pak"
@@ -804,8 +824,9 @@ sha512sums="
 	866c246cb0bcde71509e088ad77c400b9791f63d343dca13df45d034b8276f318a758ab040fbddb496a2869d3a128569fee48f682da2425237b60babbe2f7151  crubit-40fbac34597084a0863256d633889eac2c23b91b.tar.gz
 	2142c66cba3315338b3d333268662627470baeb4619aedf9558436c3ee70ebcb31cb4db5150a2d55bfb7eec9a3fd6fd334e94fd1dba6fbb682f30058362be388  ungoogled-chromium-156.0.8078.79-1.tar.gz
 	f0219b49d920762f9a518a192543fc1090d52004104a248afe258664bf3841583208a1f0690b681cfbcaa4af94c25e1a8ffcfab738b0607ac9a381907455686e  typescript_native_preview.patch.noauto
-	cc7063adb53b4fa76895ca2c01c2a1e66b6ffa368e5da036de8969e14ed76d4b6e628078167eea4e3ae4f8c9f5e263490a418cb25d6fd7a3a636e06f9d80c2f8  web-browser-launcher.sh
+	c3dfd5e3321aae11738fce5708aeb916ee9d32c0cd386715fb63e092af55d41984a8d646e46940e8be53344f5e42a204eec73ed615bd65d3f5ff0d1b7e6f9c82  web-browser-launcher.sh
 	614a70c256fb4d1bf7abd9c7c3e61165123a06f41e3c4a6bbd6fb101870d0ea045dcfbb6d4e9ce69f2da7bc688a3e6afba103e0774bdc38a6b3147c7faca4b72  web-browser.conf
+	61652e3873bfeecbee660fc403afd696cde4a2cf7a54dda0b46436d7b9812f9a99c1de7404dff184e8b8ba68b35a8b2c5e376bdb5c7d49f512b143264eec1942  uflinux3-web-browser.json
 	69b45005451ccd69c354b4c2910e92371cb801665f5e300dbecd36f8bc4ce68e77a431b5dac07c0937787debb4e93b7aadefa0a1e76c4ae334d2547ca3ca14ff  0001-hotfix-ignore-a-new-warning-in-rust-1.89.patch
 	25effbae3bd26c84a2bab1cf8bdeeea185412fa387226efd4bb536dc1bdd3615594e01a53bcd1d1fdb79aaa53165c731f1fa2c7251eaee6ddd1a8b9f59593259  compiler.patch
 	1bee1448e409fedff635388ee6f1efa6d23c29ae3e6b6fd31452c56974adb40fcd0088c82d1e643d549154663e402942cbab9807dff5aff2d8997a09de6f5655  disable-dns_config_service.patch
