@@ -75,6 +75,7 @@ makedepends="
 	flac-dev
 	flatbuffers-dev
 	flex
+	fontconfig-dev
 	freetype-dev
 	gn
 	go
@@ -90,6 +91,7 @@ makedepends="
 	lcms2-dev
 	libbsd-dev
 	libcap-dev
+	libdrm-dev
 	libevdev-dev
 	libexif-dev
 	libffi-dev
@@ -228,10 +230,16 @@ _copium_patches="
 # chrome-sandbox can use suid when user namespaces aren't available, but uses
 # only userns and drops privileges normally.
 #
+# ## NOTE: net. prepare() really does need a network, so this is not just to
+# silence "Go packages require network connection to build": cargo fetches the
+# whole gnrt dependency graph from crates.io (tools/crates has no vendor/
+# directory), and dawn builds Go with cgo. Everything else is unbundled from
+# makedepends.
+#
 # ## NOTE: !check. ungoogled's domain substitution rewrites the host names the
 # net/ and safe_browsing/ tests assert on, and the ungoogled patches drop the
 # test-only targets Alpine's check() would run.
-options="suid !check"
+options="suid net !check"
 
 export RUSTC_BOOTSTRAP=1
 
@@ -318,6 +326,13 @@ _prepare() {
 	rm -rv third_party/devtools-frontend/src/node_modules/esbuild
 	ln -sv /usr/lib/node_modules/esbuild third_party/devtools-frontend/src/node_modules/esbuild
 
+	# ## NOTE: the directory has to be recreated, not assumed. ungoogled's
+	# prune_binaries.py lists third_party/gperf/cipd/ as a contingent CIPD path
+	# and empties it, so after it runs the tree has cipd with no bin inside -
+	# the prebuilt gperf it held is exactly the binary we are replacing here.
+	# blink/renderer/build/scripts/scripts.gni hardcodes the destination as
+	# //third_party/gperf/cipd/bin/gperf, so the link has to land there.
+	mkdir -p third_party/gperf/cipd/bin
 	ln -sv /usr/bin/gperf third_party/gperf/cipd/bin/
 
 	ln -sv /usr/bin/mold buildtools/third_party/mold/cipd/mold
@@ -358,12 +373,24 @@ _prepare() {
 	rustc -V > third_party/rust-toolchain/VERSION
 	#cp third_party/rust-toolchain/VERSION third_party/rust-toolchain/INSTALLED_VERSION
 
-	(
+	# ## NOTE: the binary is *not* at tools/crates/gnrt/target/release/gnrt.
+	# build.py exports CARGO_TARGET_DIR=/cache/target to share one compiled-crate
+	# cache between packages, and that env is inherited here, so cargo writes the
+	# executable outside the source tree. Hardcoding ./target made prepare die with
+	# "gnrt: not found" right after a build that had plainly succeeded. Ask cargo
+	# itself for the target directory instead of assuming the default location.
+	local _gnrt_target
+	_gnrt_target=$(
 		cd tools/crates/gnrt || return 1
-		cargo build --locked --release
+		cargo build --locked --release >&2
+		cargo metadata --no-deps --format-version 1 |
+			python3 -c 'import json,sys; print(json.load(sys.stdin)["target_directory"])'
 	)
+	[ -x "$_gnrt_target/release/gnrt" ] || {
+		error "gnrt was built but not found under '$_gnrt_target/release'"
+	}
 	# Generates gn workflows for building
-	./tools/crates/gnrt/target/release/gnrt gen --for-std third_party/rust-toolchain/lib/rustlib/src/rust
+	"$_gnrt_target/release/gnrt" gen --for-std third_party/rust-toolchain/lib/rustlib/src/rust
 
 	# reusable system library settings
 	# libavif - https://github.com/AOMediaCodec/libavif/commit/50a541469c98009016af8dcc9f83a1be79f3a7d9
@@ -572,11 +599,23 @@ build() {
 	# final link needs lots of file descriptors
 	ulimit -n 4096
 
+	# ## NOTE: no '.unstripped' suffix on chromedriver here. Upstream builds it as
+	# executable("chromedriver_server.unstripped") (output_name = the file
+	# 'chromedriver.unstripped') plus strip_binary("chromedriver_server"), behind
+	# 'if (is_linux)', but ungoogled's
+	# patches/core/ungoogled-chromium/fix-building-with-prunned-binaries.patch
+	# rewrites that guard to 'if (false)' -- the BiDi-CDP mapper it links against is
+	# a pruned CIPD tool -- so only the 'else' branch survives and it emits plain
+	# 'chromedriver'. Ninja matches a target by name or by output path, so
+	# 'chromedriver.unstripped' used to resolve to that output file; with the branch
+	# dead nothing produces it and ninja bails out with "unknown target" before a
+	# single object file is compiled. The guard is a literal 'false', not a condition
+	# on the gn args, so enabling stripping would not bring it back either.
 	ninja -C out/bld \
 		chrome \
 		chrome_sandbox \
 		headless_shell \
-		chromedriver.unstripped \
+		chromedriver \
 		chrome_crashpad_handler
 }
 
@@ -595,8 +634,9 @@ package() {
 	# qt6
 	install -Dm755 libqt6_shim.so -t "$pkgdir"/usr/lib/$pkgname/
 
-	# chromedriver
-	install -Dm755 chromedriver.unstripped "$pkgdir"/usr/lib/$pkgname/chromedriver
+	# chromedriver -- the link output is 'chromedriver'; there is no
+	# 'chromedriver.unstripped' in this build (see the note in build()).
+	install -Dm755 chromedriver "$pkgdir"/usr/lib/$pkgname/chromedriver
 	ln -sfv ../lib/$pkgname/chromedriver "$pkgdir"/usr/bin/chromedriver
 
 	# headless shell
