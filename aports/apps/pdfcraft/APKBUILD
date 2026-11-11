@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=pdfcraft
-pkgver=0.20.0
+pkgver=0.21.0
 pkgrel=0
 pkgdesc="Read, organize, combine, split and secure PDFs"
 url="https://getartcraft.com/apps/pdfcraft"
@@ -27,11 +27,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="pdfcraft-0.20.0.tar.gz::https://github.com/storytold/pdfcraft/archive/refs/tags/v0.20.0.tar.gz"
-builddir="$srcdir/pdfcraft-0.20.0"
+source="pdfcraft-0.21.0.tar.gz::https://github.com/storytold/pdfcraft/archive/refs/tags/v0.21.0.tar.gz"
+builddir="$srcdir/pdfcraft-0.21.0"
 _craft_app="pdfcraft"
 _craft_bins="pdfcraft pdfcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-2324190c3c8e3b3eda4ba73e82c12191cb275e7ff40a916af89714d6ebd364a94ad4cd31731bf4e7627506205e11a68b1f7ca3315410739943cd3551e4da3b71  pdfcraft-0.20.0.tar.gz
+1ca1ab98c4f843fc2456112d29ebb07bec138ef671c65c2e9a058a6adfcff49242516a7ee19204b5834e03510008c56ff991f7721ed777997665c10176d049d7  pdfcraft-0.21.0.tar.gz
 "

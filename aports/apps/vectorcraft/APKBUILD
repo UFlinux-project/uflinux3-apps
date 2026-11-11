@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=vectorcraft
-pkgver=0.23.0
+pkgver=0.24.0
 pkgrel=0
 pkgdesc="Draw and edit vector illustrations, SVG and PDF"
 url="https://getartcraft.com/apps/vectorcraft"
@@ -27,11 +27,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="vectorcraft-0.23.0.tar.gz::https://github.com/storytold/vectorcraft/archive/refs/tags/v0.23.0.tar.gz"
-builddir="$srcdir/vectorcraft-0.23.0"
+source="vectorcraft-0.24.0.tar.gz::https://github.com/storytold/vectorcraft/archive/refs/tags/v0.24.0.tar.gz"
+builddir="$srcdir/vectorcraft-0.24.0"
 _craft_app="vectorcraft"
 _craft_bins="vectorcraft vectorcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-593777ea1016561d022d6e652a1d1aaaea819b9ee4bb3f28cd2aba87a43bfb11e909396c11ef256819ed7797ead06fec7c867a6a3deb1e42a7d66c827145da7a  vectorcraft-0.23.0.tar.gz
+446b1e00254797f7a89831a78fa16d3cb554452ee7b21ce2bc0aab2d3bc3d1287bca5a54220c3c015ccef154d07fcff9d5121733abbdb787369905c1feb47e9a  vectorcraft-0.24.0.tar.gz
 "

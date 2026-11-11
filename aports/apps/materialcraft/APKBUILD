@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=materialcraft
-pkgver=0.3.0
+pkgver=0.4.0
 pkgrel=0
 pkgdesc="Design procedural PBR materials with node graphs"
 url="https://getartcraft.com/apps/materialcraft"
@@ -27,11 +27,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="materialcraft-0.3.0.tar.gz::https://github.com/storytold/materialcraft/archive/refs/tags/v0.3.0.tar.gz"
-builddir="$srcdir/materialcraft-0.3.0"
+source="materialcraft-0.4.0.tar.gz::https://github.com/storytold/materialcraft/archive/refs/tags/v0.4.0.tar.gz"
+builddir="$srcdir/materialcraft-0.4.0"
 _craft_app="materialcraft"
 _craft_bins="materialcraft materialcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-75319c6c00749efce4aada7d0c3b921af4b0f0e896864d3d48a399526b1c690f9fbc39f35d0e5547936fdf8d327404e24169696af061fed99e435bf739cef9ea  materialcraft-0.3.0.tar.gz
+db04e0acb4042dc280b5b9252a16076b10f5cca6cc318ab1da2e30f839fb6314cf9856bb70b028ed6d77020cd6c3f3b01a5e5b62d410db4cda022ecc819b0830  materialcraft-0.4.0.tar.gz
 "

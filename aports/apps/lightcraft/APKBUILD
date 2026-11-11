@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=lightcraft
-pkgver=0.20.0
+pkgver=0.21.0
 pkgrel=0
 pkgdesc="Organise photos and develop raw files, non-destructively"
 url="https://getartcraft.com/apps/lightcraft"
@@ -27,12 +27,12 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="lightcraft-0.20.0.tar.gz::https://github.com/storytold/lightcraft/archive/refs/tags/v0.20.0.tar.gz"
-builddir="$srcdir/lightcraft-0.20.0"
+source="lightcraft-0.21.0.tar.gz::https://github.com/storytold/lightcraft/archive/refs/tags/v0.21.0.tar.gz"
+builddir="$srcdir/lightcraft-0.21.0"
 _craft_app="lightcraft"
 _craft_bins="lightcraft lightcraft-cli"
 _craft_features="lightcraft/heif lightcraft-cli/heif"
 . "$startdir/../craft-common.sh"
 sha512sums="
-3aa837b7d9b0e40619785d32daa7c99d94314c02440fa7dbda29644eb00362beda25b5e440021a7d876b2fb273936e007e76df8c89c10b9a70906add4a588725  lightcraft-0.20.0.tar.gz
+9fb7f56336907d716da95f2a05ae627912980beae8e81a47add1d7e50a7a359d539bd143476b1c27dde2c8000b2236dfde86b837e2a1512d2f2b09a71a159de0  lightcraft-0.21.0.tar.gz
 "

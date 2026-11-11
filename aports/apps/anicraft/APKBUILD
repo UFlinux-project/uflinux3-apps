@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=anicraft
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=0
 pkgdesc="Draw and animate 2D vector art on a timeline"
 url="https://getartcraft.com/apps/anicraft"
@@ -29,11 +29,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="anicraft-0.1.0.tar.gz::https://github.com/storytold/anicraft/archive/refs/tags/v0.1.0.tar.gz"
-builddir="$srcdir/anicraft-0.1.0"
+source="anicraft-0.2.0.tar.gz::https://github.com/storytold/anicraft/archive/refs/tags/v0.2.0.tar.gz"
+builddir="$srcdir/anicraft-0.2.0"
 _craft_app="anicraft"
 _craft_bins="anicraft anicraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-a68d6a893b0af5c77cc1a9a4e9134a22d4088f07adf442d7ec33395e1fae952fb2e753f3616f984645a1b8526e43f8d98b498dc3276ab583ec4d03f4bf779277  anicraft-0.1.0.tar.gz
+f7fa9a59b6d675b0340e2199ed9b871d0c1129978fe9d5c4fea3b4ade8879044cfa5737470ba0b95f697d55ffa2819c704ceeec183aa1d62adede8e8b20497ee  anicraft-0.2.0.tar.gz
 "

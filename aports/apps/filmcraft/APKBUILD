@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=filmcraft
-pkgver=0.19.0
+pkgver=0.20.0
 pkgrel=0
 pkgdesc="Edit video, color and sound"
 url="https://getartcraft.com/apps/filmcraft"
@@ -32,11 +32,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="filmcraft-0.19.0.tar.gz::https://github.com/storytold/filmcraft/archive/refs/tags/v0.19.0.tar.gz"
-builddir="$srcdir/filmcraft-0.19.0"
+source="filmcraft-0.20.0.tar.gz::https://github.com/storytold/filmcraft/archive/refs/tags/v0.20.0.tar.gz"
+builddir="$srcdir/filmcraft-0.20.0"
 _craft_app="filmcraft"
 _craft_bins="filmcraft filmcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-93861de15103db30b773baf5ee66ac937082066e68e5d327e7a3fb3404c44e7457506ec599515bbf62c75ad3120ee7370e465ebbf3a5371c797534f5ca1d0ba7  filmcraft-0.19.0.tar.gz
+cb5898ba9c382c41c78290c99f034f0471cf084874ba8d7799fbcc74531e25c832adf2ef82a18e4900169bbe66a0ae096d3b4da6dd8c72ad082f88872b9ba006  filmcraft-0.20.0.tar.gz
 "

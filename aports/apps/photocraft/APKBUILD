@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=photocraft
-pkgver=0.22.0
+pkgver=0.23.0
 pkgrel=0
 pkgdesc="Edit photos and layered PSD documents"
 url="https://getartcraft.com/apps/photocraft"
@@ -38,13 +38,13 @@ subpackages="
 	$pkgname-zsh-completion
 	$pkgname-fish-completion
 	"
-source="photocraft-0.22.0.tar.gz::https://github.com/storytold/photocraft/archive/refs/tags/v0.22.0.tar.gz"
-builddir="$srcdir/photocraft-0.22.0"
+source="photocraft-0.23.0.tar.gz::https://github.com/storytold/photocraft/archive/refs/tags/v0.23.0.tar.gz"
+builddir="$srcdir/photocraft-0.23.0"
 _craft_app="photocraft"
 _craft_bins="photocraft photocraft-cli"
 _craft_features="heif"
 _craft_man=yes
 . "$startdir/../craft-common.sh"
 sha512sums="
-bf48fc6f4b9c5085a2eec870d7e89fc56285207060cdbdf33a07bf92ea24f6d0d6f08b2c3fa33dcbd8d2347e1cf38c13ce320e98a9120406a5794a217cfd665b  photocraft-0.22.0.tar.gz
+88c777e41eaaa0f93f80aac7a45a0fad44fd738cb4f4b96cf637a9e3b062d4781f3a91d89911c5107c9bb2dd199287b9de3c0019397d52a94d8d409e5f486faa  photocraft-0.23.0.tar.gz
 "

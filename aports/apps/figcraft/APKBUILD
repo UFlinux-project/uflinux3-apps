@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=figcraft
-pkgver=0.17.0
+pkgver=0.18.0
 pkgrel=0
 pkgdesc="Design and prototype user interfaces"
 url="https://getartcraft.com/apps/figcraft"
@@ -29,11 +29,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="figcraft-0.17.0.tar.gz::https://github.com/storytold/figcraft/archive/refs/tags/v0.17.0.tar.gz"
-builddir="$srcdir/figcraft-0.17.0"
+source="figcraft-0.18.0.tar.gz::https://github.com/storytold/figcraft/archive/refs/tags/v0.18.0.tar.gz"
+builddir="$srcdir/figcraft-0.18.0"
 _craft_app="figcraft"
 _craft_bins="figcraft figcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-8587ec6aa7e919e226f33194a702b895a7067f41627b2c21fc346e5fed44c63fdbd4439e9f91d645f18ceba4a4507ac0f745316c58a8b0abfb1a0ad962de84b2  figcraft-0.17.0.tar.gz
+dafe0518a2982a21b1e237b716e603fe04fbf399b5da9b9b7f9b07530aca4ddd92ea16fa5b85fa94fd7ae4b0b453ea85fd98878facd1142856c2676a8e7eb6dd  figcraft-0.18.0.tar.gz
 "
