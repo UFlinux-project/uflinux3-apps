@@ -58,45 +58,6 @@ The deviations worth knowing about:
 - **`!check`.** Domain substitution rewrites exactly the host names the `net/`
   and `safe_browsing/` tests assert on, and ungoogled's patches drop the
   test-only targets Alpine's `check()` would run.
-- **Experimental V4L2 backend, selected by the launcher.**
-  `use_v4l2_codec=true` builds Chromium's Video4Linux2 hardware codec backend
-  (`media/gpu/v4l2`) in addition to VA-API. It is upstream-labelled experimental
-  and is not used unless the `PreferV4L2VideoAcceleration` feature is on, which
-  it is not by default, so VA-API remains the default accelerator. The launcher
-  supplies the opt-in: when VA-API is *not* available but a `/dev/video*` node
-  is, it prepends `--enable-features=PreferV4L2VideoAcceleration`.
-  VA-API counts as available only with both a DRM render node *and* a driver for
-  libva to load, i.e. a `*_drv_video.so` in `$LIBVA_DRIVERS_PATH` or the
-  loader's `dri` directory — which is exactly what libva itself `dlopen()`s.
-  Shelling out to `vainfo` would not do: it needs a display connection and fails
-  headless, so it cannot tell "no GPU" apart from "no X or Wayland". Machines
-  with VA-API, and machines with neither, are launched unmodified. To override
-  the probe, put `--disable-features=PreferV4L2VideoAcceleration` (or
-  `--enable-features=` it) in `WEB_BROWSER_USER_FLAGS`; user flags come last on
-  the command line and `--disable-features` wins over `--enable-features`. The
-  backend pulls in no new build dependency: it links only libdrm (unbundled),
-  in-tree `libyuv`/`libgav1`, and `linux/videodev2.h` from `linux-headers`.
-- **Default enterprise policy.** `uflinux3-web-browser.json` is installed into
-  `/etc/chromium/policies/recommended/`. This build reads policies from
-  `/etc/chromium/policies` (`components/policy/core/common/policy_paths.cc`: on
-  Linux, without Google Chrome branding, that directory is `/etc/chromium/policies`,
-  not `/etc/web-browser`), and `config_dir_policy_loader.cc` treats the
-  `recommended/` subdir as `POLICY_LEVEL_RECOMMENDED` -- so these are defaults the
-  user can still change in Settings, without the "Managed by your organization"
-  lock a mandatory (`managed/`) policy would impose. The namespaced file name
-  keeps it clear of Alpine's own chromium package, which writes into the same
-  directory. It turns Memory Saver
-  on at maximum aggressiveness (`HighEfficiencyModeEnabled`,
-  `MemorySaverModeSavings=2`) and enables extended preloading
-  (`NetworkPredictionOptions=3`; the handler is a plain integer with no range
-  clamp, so the value 3 that the UI calls "Extended" is accepted).
-- **Two extensions installed by default.** The same policy file pre-installs
-  enhanced-h264ify (`omkfmpieigblcllmkgbflkikinpkodlk`) and uBlock Origin Lite
-  (`ddkjiahejlhfcafbddmgiahcphecmpfh`) from the Chrome Web Store update
-  endpoint. `installation_mode: normal_installed` rather than a force-install
-  list, so both show up as installed on first run but stay removable. uBlock
-  Origin Lite is the MV3 build: the classic uBlock Origin
-  (`cjpalhdlnbpafiamejdnhcphjbkeiagm`) is MV2 and cannot be shipped here.
 - **MEIPreload is conditional.** ungoogled's `disable-mei-preload.patch` removes
   the data dependency, so the component is never built and the directory does not
   exist.
