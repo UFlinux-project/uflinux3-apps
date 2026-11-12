@@ -62,9 +62,10 @@ scripts/build.sh                 thin wrapper so `sh scripts/build.sh` works
 scripts/ci-matrix.py             the GitHub Actions matrix, from the config files
 scripts/gen-app-recipes.py       renders the Craft APKBUILDs from the lockfile
 scripts/update-checksums.py      bumps the lockfile to the newest upstream release
+scripts/update-browser.py        bumps the web-browser recipe to Alpine's chromium
 scripts/collect-packages.py      turns workflow artifacts back into out/packages/<arch>/
 .github/workflows/build.yml      build every package, then publish the repository
-.github/workflows/update.yml     daily: bump the lockfile and release if upstream moved
+.github/workflows/update.yml     daily: bump the lockfile and browser, release if upstream moved
 ```
 
 The fifteen Craft recipes are generated, not hand-written: `config/apps.lock.json`
@@ -116,6 +117,7 @@ Useful details:
 
 Before pushing, the checks CI runs are all local: `python3 scripts/gen-app-recipes.py`
 (recipes must match the lockfile), `python3 scripts/update-checksums.py --check`,
+`python3 scripts/update-browser.py --check`,
 `shellcheck` plus `busybox ash -n` on every shell file under `aports/` and
 `scripts/` - recipes, the helper they source, and the scripts a recipe installs
 alike, because abuild is `ash`, not `bash`, and a bashism only shows up as a
@@ -124,11 +126,13 @@ See [docs/adding-an-app.md](docs/adding-an-app.md) for the details.
 
 ## Releasing
 
-Every day, `.github/workflows/update.yml` runs `scripts/update-checksums.py`. If
-no app moved, that is the end of it. If any did, the workflow commits the new
-lockfile and its regenerated recipes to `main`, tags the commit, and starts a
-release of it - so an upstream release becomes a package here without anyone
-noticing it first.
+Every day, `.github/workflows/update.yml` runs `scripts/update-checksums.py` for
+the Craft apps and `scripts/update-browser.py` for the browser (which follows
+Alpine's `community/chromium` recipe rather than a release feed - see
+[docs/browser.md](docs/browser.md)). If nothing moved, that is the end of it. If
+anything did, the workflow commits the new lockfile, its regenerated recipes and
+the browser recipe to `main`, tags the commit, and starts a release of it - so an
+upstream release becomes a package here without anyone noticing it first.
 
 Tags are dates, not versions: `v<year>.<month>.<number-in-month>`. No single
 number describes fifteen apps, and the build workflow only requires a tag that

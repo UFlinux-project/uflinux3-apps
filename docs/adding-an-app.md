@@ -40,8 +40,10 @@ daily, that annotation is a backstop - it goes off if the update workflow is
 broken or disabled, not in the normal course of events. A checksum that is simply
 *wrong* is a different matter - abuild verifies it and fails the build.
 
-`web-browser` is not in the lockfile and is not touched by any of this; see
-[docs/browser.md](browser.md) to bump it.
+`web-browser` is not in the lockfile and is not touched by any of this. It is
+still bumped automatically, but by `scripts/update-browser.py` in the same daily
+run, following Alpine rather than a release feed; see
+[docs/browser.md](browser.md).
 
 ### Adding an app
 
@@ -174,7 +176,9 @@ native x86_64, and the phase most likely to run past a runner's time limit under
 emulation, being the one phase more jobs cannot shorten. Turning LTO off makes
 that link parallel and much shorter for a slightly larger binary, a trade worth
 making only where the alternative is that the architecture is not published at
-all; a native build gets upstream's own profile untouched.
+all; a native build gets upstream's own profile untouched. (The browser has the
+opposite problem on 32-bit, where LTO is what makes the link fit in memory at
+all; see the LTO section of [docs/browser.md](browser.md).)
 
 The three apps that ship a man page (`cadcraft`, `photocraft`, `soundcraft`) build
 their documentation generator as a second `cargo` run, which is upstream's own

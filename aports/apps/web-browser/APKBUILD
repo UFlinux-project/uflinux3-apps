@@ -516,6 +516,29 @@ _configure() {
 		;;
 	esac
 
+	# Alpine builds without LTO on every arch, which is the right call on the
+	# 64-bit builders where the link is already the peak-memory phase. On
+	# 32-bit it is the opposite: the single-threaded final link of a non-LTO
+	# Chromium is what OOMs an armv7 builder, and ThinLTO is the way out,
+	# because it splits the link into per-module parallel passes instead of
+	# one whole-program pass (Chromium's own docs put it at 3x-10x faster and
+	# far lighter than full LTO). So 64-bit keeps Alpine's setting and 32-bit
+	# opts in.
+	#
+	# ## NOTE: enabling LTO makes Chromium's build assert(use_lld), and
+	# use_lld is forced off by the use_mold=true above. A 32-bit build that
+	# reaches this branch has to resolve that (drop mold on 32-bit, or pass
+	# use_mold=false alongside use_thin_lto=true) before armv7 is added to
+	# arch=. No currently enabled arch takes this branch.
+	case "$CARCH" in
+	x86_64 | aarch64 | riscv64 | ppc64le | s390x)
+		local gn_lto=false
+		;;
+	*)
+		local gn_lto=true
+		;;
+	esac
+
 	case "$USE_CCACHE" in
 	1)
 		local cc_wrapper="ccache"
@@ -582,7 +605,7 @@ _configure() {
 		use_safe_libstdcxx=false
 		use_system_libffi=true
 		use_sysroot=false
-		use_thin_lto=false
+		use_thin_lto=$gn_lto
 		use_unofficial_version_number=false
 		use_vaapi=$vaapi
 		v8_drumbrake_bounds_checks=true

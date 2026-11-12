@@ -8,7 +8,12 @@ name: Check for upstream updates
 # every package for every architecture and replaces the published repository.
 # When nothing has moved nothing is pushed, so a quiet day costs one cheap job.
 #
-# The tag names a repository release, not an app version: fifteen apps move
+# The browser is checked by scripts/update-browser.py in the same run, because a
+# browser bump is released exactly like a Craft bump and should not need its own
+# commit, tag and matrix run. It is not a crate, so what it follows is Alpine's
+# community/chromium recipe rather than a release feed; see docs/browser.md.
+#
+# The tag names a repository release, not an app version: the apps move
 # independently, so no single app's version describes the set. It is therefore
 # dated - v<YYYY>.<MM>.<NN>, the NNth release of that month - which is what
 # build.yml's `v[0-9]+.[0-9]+.[0-9]+` rule accepts, what sorts correctly, and
@@ -57,20 +62,28 @@ jobs:
           # became while it was being computed, and a shallow clone cannot
           # always replay a commit onto a moved tip.
           fetch-depth: 0
-      - name: Resolve the newest stable release of every app
+      - name: Resolve the newest stable release of every package
         id: bump
         env:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           log="$RUNNER_TEMP/update.log"
           status=0
-          # The script prints one line per app - `current`, `updated` or `failed` -
-          # and writes the lockfile only if every app resolved, so a nonzero exit
-          # can never have left a half-finished bump behind. Keep the log: the
-          # `updated` lines are the release notes, and the `failed` lines are the
-          # only description of what went wrong.
+          # The scripts print one line per package - `current`, `updated`,
+          # `deferred` or `failed` - and write their files only if everything
+          # resolved, so a nonzero exit can never have left a half-finished bump
+          # behind. Keep the log: the `updated` lines are the release notes, and
+          # the `failed` lines are the only description of what went wrong.
           python3 scripts/update-checksums.py >"$log" 2>&1 || status=$?
+          python3 scripts/update-browser.py >>"$log" 2>&1 || status=$?
           cat "$log"
+
+          # Alpine being ahead of ungoogled-chromium by a few days is the normal
+          # case, not an error: the browser script reports it and exits 0, and the
+          # next run picks the bump up.
+          if grep -q '^deferred ' "$log"; then
+            sed -n 's|^deferred *\([^ ]*\) *\(.*\)$|::notice::\1: \2|p' "$log"
+          fi
 
           if [ "$status" -ne 0 ]; then
             # One unreachable repository, one rate limit, or one release whose tag
@@ -83,8 +96,8 @@ jobs:
             else
               # The only other way to get here is the recipe generator the script
               # runs after writing, which leaves the lockfile modified.
-              echo "::error::update-checksums.py exited $status without naming an" \
-                "app; the lockfile may be modified but uncommitted."
+              echo "::error::an update script exited $status without naming a" \
+                "package; the lockfile may be modified but uncommitted."
             fi
             echo "Nothing was committed, so the published repository is unchanged." \
               >> "$GITHUB_STEP_SUMMARY"
@@ -99,12 +112,12 @@ jobs:
           echo "dry_run=${DRY_RUN:-false}" >> "$GITHUB_OUTPUT"
 
           if git diff --cached --quiet -- config aports; then
-            echo "Every app is already at the newest stable upstream release." >> "$GITHUB_STEP_SUMMARY"
+            echo "Every package is already at the newest stable upstream release." >> "$GITHUB_STEP_SUMMARY"
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # The script's own "updated <app> <old> -> <new> (<fields>)" lines are
+          # The scripts' own "updated <app> <old> -> <new> (<fields>)" lines are
           # the release notes for a repository release with no author to write
           # them, so they are kept rather than reformatted. One file becomes both
           # the commit message and the tag annotation, so the two cannot disagree
@@ -112,7 +125,7 @@ jobs:
           # -F, so the subject has to be in the file.)
           note="$RUNNER_TEMP/release-note"
           {
-            echo 'bump Craft apps to their newest upstream release'
+            echo 'bump packages to their newest upstream release'
             echo
             grep '^updated ' "$log" || true
           } >"$note"

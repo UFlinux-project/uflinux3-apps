@@ -79,10 +79,63 @@ builders. Adding an architecture therefore means adding a toolchain, not a
 patch. `scripts/build.py` skips the package with a note instead of failing when
 CI asks for an unsupported architecture.
 
+### LTO
+
+`_configure` sets `use_thin_lto` from a `case "$CARCH"` rather than copying
+Alpine's flat `use_thin_lto=false`:
+
+- **64-bit** (`x86_64`, `aarch64`, and the other 64-bit arches Alpine has) keeps
+  Alpine's setting. There the final link is already the peak-memory phase, and
+  LTO in any form only makes it worse.
+- **32-bit** opts in to ThinLTO. A non-LTO Chromium's single whole-program link
+  is what OOMs an armv7 builder; ThinLTO splits that into per-module parallel
+  passes, which Chromium's own docs put at 3x-10x faster and far lighter than
+  full LTO. Full LTO is not an option at all — Chromium 156's `compiler.gni`
+  exposes only the `use_thin_lto` boolean, and `-flto=full` appears in the build
+  solely under `is_wasm`.
+
+abuild itself adds no LTO flags, so GN is the only knob here. (The Craft apps'
+`CARGO_PROFILE_RELEASE_LTO=false` in `scripts/build.py` is a separate,
+Cargo-only matter.)
+
+`armv7` is still not in `arch=`, because of the caveat marked `## NOTE` in
+`_configure`: enabling LTO makes Chromium's build `assert(use_lld)`, and
+`use_lld` is forced off by the recipe's `use_mold=true`. Before armv7 is enabled,
+a 32-bit build has to drop mold or pass `use_mold=false` alongside
+`use_thin_lto=true`. The flag is conditional now so that decision is a one-line
+change rather than a re-derivation.
+
 ## Bumping the version
 
-Chromium is one atomic bump; the components below are pinned to each other and a
-mismatch fails in `prepare()` or during the build, sometimes in confusing ways.
+`scripts/update-browser.py` does the mechanical part of a bump, and
+`.github/workflows/update.yml` runs it daily alongside the Craft app checks. It
+reads `alpine.version` from `config/repository.json`, fetches Alpine's
+`community/chromium/APKBUILD` for that branch, and — only once ungoogled-chromium
+has published a release for the new version — rewrites the pins below, resets
+`pkgrel`, copies Alpine's `_copium_patches` list, re-vendors Alpine's `*.patch`
+files and its `source` entries, and regenerates `sha512sums`. Checksums for the
+large downloads are reused from Alpine rather than recomputed; the kangie
+tarball is 2GB.
+
+Until ungoogled catches up the bump is reported as `deferred` rather than
+`failed`, and the next run picks it up. Alpine being a few days ahead is the
+normal case.
+
+What stays manual:
+
+- **Dependency lists.** `makedepends` changes are read, not written: a new
+  unbundled library needs a `gn` flag too, and that is a judgement call.
+- **`_llvmver`.** It is copied from Alpine, but it has to exist in the Alpine
+  release we target; if it does not, the bump has to wait for the toolchain.
+- **Our own files.** `web-browser-launcher.sh` and `web-browser.conf` are
+  Alpine's `chromium-launcher.sh` and `chromium.conf` renamed and edited, so the
+  script never re-fetches them; check those two files' diffs against Alpine by
+  hand when a release changes them. `google-api.keys` is dropped entirely.
+- **The build.** Nothing here replaces building the recipe in a chroot before
+  pushing; the script guarantees the recipe is consistent, not that Chromium
+  compiles.
+
+For reference, the pins a bump moves and where each one comes from:
 
 1. `pkgver` — the newest stable release. Alpine's `community/chromium` version is
    the safest choice, because the whole recipe is derived from that revision.
@@ -98,16 +151,10 @@ mismatch fails in `prepare()` or during the build, sometimes in confusing ways.
    It has to exist in the Alpine release we target; if it does not, the bump has
    to wait for the toolchain.
 
-Then re-vendor the Alpine-side files, because they change between releases: the
-20 `*.patch` files, the `_copium_patches` list, and any `source` entry whose URL
-shape changed. Copy them from the recipe of the release you are bumping to, and
-keep the local renames (`web-browser-*` for our own files, `.noauto` for anything
-that must not be unpacked or auto-applied).
-
-Finally regenerate `sha512sums`. The list is positional: abuild matches it
-against `$source` entry by entry, and the name it hashes is the left-hand side of
-`::`, so an entry that is out of order or renamed fails loudly rather than
-silently.
+The `sha512sums` list is positional: abuild matches it against `$source` entry by
+entry, and the name it hashes is the left-hand side of `::`, so an entry that is
+out of order or renamed fails loudly rather than silently. To regenerate it by
+hand instead of with the script:
 
 ```sh
 # From a checkout, inside an Alpine chroot with coreutils and curl:
@@ -115,4 +162,5 @@ abuild -F checksum            # fetches everything and prints the new block
 ```
 
 `abuild` also warns about any file in the recipe directory that is not listed in
-`$source`, so leftover patches from the previous version show up here too.
+`$source`, so leftover patches from the previous version show up here too. Run
+`scripts/update-browser.py --check` to confirm a hand-made bump matches Alpine.
