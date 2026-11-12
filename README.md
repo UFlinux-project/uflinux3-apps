@@ -42,8 +42,11 @@ packages are built against, and the path the repository is published under.
 
 Craft Anything and ArtCraft Studio are deliberately not packaged here.
 
-Packages are built for every architecture UFLinux ships: `x86`, `x86_64`,
-`aarch64`, `armv7`, `ppc64le`, `s390x` and `riscv64`. Shared libraries come from
+Packages are built for every 64-bit architecture UFLinux ships: `x86_64`,
+`aarch64`, `ppc64le`, `s390x` and `riscv64`. The 32-bit architectures (`x86`,
+`armv7`) are not built: a 32-bit `rustc` runs out of address space linking the
+bigger Craft binaries, and Alpine's own builders cannot link Chromium on armv7
+either. Shared libraries come from
 Alpine wherever a compatible package exists (`ffmpeg`, `openh264`, `pipewire`,
 `mesa`, `fontconfig`, `icu`, ...), so an installed app pulls dependencies that
 the base system already provides instead of carrying its own copies.
@@ -93,14 +96,9 @@ Useful details:
 
 - An `--arch` the host cannot execute natively needs `qemu-user-binfmt` with the
   `F` (fix-binary) flag; `build.py` refuses to start rather than fail obscurely
-  later. Native means the host's own architecture plus any 32-bit variant its
-  kernel can run directly, so an `x86_64` host builds `x86` and `x86_64` without
-  emulation and an `aarch64` host builds `aarch64` and `armv7` - which is how
-  Alpine's own builders do it. The table lives in `NATIVE` in `scripts/build.py`.
-  The Craft Cargo overrides are separate: `CARGO_BUILD_JOBS=1` follows emulation,
-  but the LTO override follows the target's pointer width (`NARROW`), because a
-  32-bit `rustc` runs out of address space on the final link even on a 64-bit
-  kernel.
+  later. Every architecture here is 64-bit, so native means the host's own
+  architecture: an `x86_64` host builds `x86_64` directly and everything else
+  under qemu. The table lives in `NATIVE` in `scripts/build.py`.
 - Downloads, the apk cache, `CARGO_HOME` and `CARGO_TARGET_DIR` live under
   `--cache` (default `.cache/build/<arch>`), so re-running a build is incremental
   and safe to delete at any time.

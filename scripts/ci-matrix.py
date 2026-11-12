@@ -44,7 +44,7 @@ def configuration(arches, repository, apps, event, ref):
         raise ValueError("Tag must be v followed by a numeric version, e.g. v3.24.1")
     if event not in {"push", "pull_request", "workflow_dispatch", "merge_group", "schedule"}:
         raise ValueError("Unsupported event " + repr(event))
-    # Only a run that is meant to be published is worth building seven times
+    # Only a run that is meant to be published is worth building five times
     # over; a push to the watched branch is a cheap x86_64 smoke test.
     full = release or event in {"workflow_dispatch", "schedule"}
     selected = list(arches) if full else ["x86_64"]
@@ -61,13 +61,13 @@ def configuration(arches, repository, apps, event, ref):
                 "runner": arches[a]["runner"],
                 "package": p,
                 # Decides one thing: whether the shard installs qemu-user. This
-                # list of "needs no emulation" architectures is deliberately
-                # narrower than build.py's own NATIVE table, which also counts
-                # x86 on an x86_64 runner and armv7 on an aarch64 one. Installing
-                # qemu where the kernel would not have needed it is harmless - the
-                # native ELF handler has higher binfmt priority and wins - while
-                # the opposite would leave the shard without a translator. The
-                # reason the job's timeout is so long.
+                # list of "needs no emulation" architectures is the 64-bit
+                # architecture's own name, matching build.py's NATIVE table.
+                # Staying on the strict side is harmless - installing qemu where
+                # the kernel would not have needed it changes nothing, because
+                # the native ELF handler has higher binfmt priority and wins -
+                # while the opposite would leave the shard without a translator.
+                # The reason the job's timeout is so long.
                 "emulated": "true" if a not in {"x86_64", "aarch64"} else "false",
             }
             for a in selected

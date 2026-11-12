@@ -176,15 +176,17 @@ native x86_64, and the phase most likely to run past a runner's time limit under
 emulation, being the one phase more jobs cannot shorten. Turning LTO off makes
 that link parallel and much shorter for a slightly larger binary, a trade worth
 making only where the alternative is that the architecture is not published at
-all; a 64-bit native build gets upstream's own profile untouched. The LTO part of
-the override is keyed on the *target* being 32-bit (`NARROW` in `build.py`), not
-on qemu: a 32-bit `rustc` is a 32-bit process with barely 3 GiB of address space
-whatever runs it, and the same single-codegen-unit link fails with `rustc-LLVM
-ERROR: out of memory` on an x86_64 kernel as surely as under emulation - which is
-why the `x86` shards of the bigger apps used to die while the 64-bit ones passed.
-(The browser reaches the same ceiling from the other direction on 32-bit, where
-ThinLTO is what makes the link fit in memory at all; see the LTO section of
-[docs/browser.md](browser.md).)
+all; a native build gets upstream's own profile untouched.
+
+This is also why the 32-bit architectures (`x86`, `armv7`) are not built at all:
+a 32-bit `rustc` is a 32-bit process with barely 3 GiB of address space whatever
+runs it, so the same single-codegen-unit link fails with `rustc-LLVM ERROR: out
+of memory` on an x86_64 kernel as surely as under emulation - the `x86` shards
+of the bigger apps died there while the 64-bit ones passed. Disabling LTO would
+have papered over it at the cost of shipping something other than upstream's
+profile on an architecture UFLinux does not ship. (The browser reaches the same
+ceiling from the other direction on 32-bit, where ThinLTO is what makes the link
+fit in memory at all; see the LTO section of [docs/browser.md](browser.md).)
 
 The three apps that ship a man page (`cadcraft`, `photocraft`, `soundcraft`) build
 their documentation generator as a second `cargo` run, which is upstream's own

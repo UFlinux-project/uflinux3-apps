@@ -142,9 +142,9 @@ jobs:
       APK_SIGNING_PRIVATE_KEY: ${{ secrets.APK_SIGNING_PRIVATE_KEY }}
       APK_SIGNING_PUBLIC_KEY: ${{ secrets.APK_SIGNING_PUBLIC_KEY }}
       # No CARGO_BUILD_JOBS here: build.py compares the target architecture
-      # against the runner's own `uname -m` and knows what to do about the
-      # single-threaded final link that emulation makes expensive, as well as
-      # the 32-bit address space that makes the same link OOM. Keeping the
+      # against the runner's own `uname -m`, which is the same fact
+      # `matrix.emulated` is derived from, and it also knows what to do about the
+      # single-threaded final link that emulation makes expensive. Keeping the
       # rule in one place is what keeps the two from disagreeing.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

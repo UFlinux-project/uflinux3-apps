@@ -45,36 +45,19 @@ PACKAGES = sorted([*APPS, "web-browser"])
 BROWSER_ARCHES = set(CONFIG["browser_arches"])
 
 # Which target architectures a host can execute without emulation, keyed by the
-# `uname -m` of the host. The values are Alpine architecture names, because that
-# is what `--arch` takes, and the two vocabularies differ: Alpine calls 32-bit
-# x86 `x86`, not the `i386`/`i686` a kernel reports, and 32-bit ARM `armv7`, not
-# `armv7l`. Getting this wrong in the strict direction is harmless - a needless
-# binfmt requirement - but in the loose direction it means the build proceeds
-# without translation and dies on an exec format error.
-#
-# An x86_64 kernel runs 32-bit x86 ELF natively (CONFIG_IA32_EMULATION, standard
-# on distro kernels), and Alpine's aarch64 kernel has CONFIG_COMPAT=y, so it runs
-# 32-bit ARM too. Both are how the official Alpine runners build those
-# architectures without qemu.
+# `uname -m` of the host. Every architecture we build is 64-bit and its Alpine
+# name matches `uname -m` exactly, so the table is nearly a tautology; it stays
+# explicit because getting it wrong in the loose direction means the build
+# proceeds without translation and dies on an exec format error. (A 32-bit ARM
+# host would be the exception: `uname -m` says `armv7l` where Alpine says
+# `armv7`.)
 NATIVE = {
-    "x86_64": {"x86_64", "x86"},
-    "aarch64": {"aarch64", "armv7"},
-    "armv7l": {"armv7"},
+    "x86_64": {"x86_64"},
+    "aarch64": {"aarch64"},
     "ppc64le": {"ppc64le"},
     "s390x": {"s390x"},
     "riscv64": {"riscv64"},
 }
-
-# The 32-bit architectures, where the compiler itself is a 32-bit process: its
-# address space is capped near 3 GiB whatever runs it, so a single-codegen-unit
-# LTO link of one of the bigger binaries fails with `rustc-LLVM ERROR: out of
-# memory` / `Buffer allocation failed` long before a 64-bit host would care.
-# This is a property of the target, not of emulation: an x86 rustc running
-# natively on an x86_64 kernel has exactly as little room as one under qemu,
-# which is why the Cargo profile override below is keyed on this set and not on
-# NATIVE. (The browser reaches the same ceiling from the other direction and
-# needs ThinLTO to stay under it; see docs/browser.md.)
-NARROW = {"x86", "armv7"}
 
 # Free space a Rust release build plus an Alpine toolchain comfortably needs.
 MINIMUM_FREE_BYTES = 10 * 1024**3
@@ -361,20 +344,16 @@ class Build:
             # shorten. Turning LTO off makes that link parallel and far shorter,
             # for a slightly larger and marginally slower binary, which is a
             # trade worth making only where the alternative is that the
-            # architecture is not published at all. A 64-bit native build
-            # therefore gets upstream's own profile.
-            #
-            # The LTO part of the override is not tied to emulation, though: a
-            # 32-bit rustc OOMs on the same link on any host (see NARROW), so
-            # `x86` and `armv7` get it even when their instructions run
-            # natively. Only the job count stays an emulation concern.
+            # architecture is not published at all. A native build therefore gets
+            # upstream's own profile. (32-bit targets need the same LTO override
+            # even natively - a 32-bit rustc OOMs on that link whatever runs it -
+            # which is part of why `x86` and `armv7` are no longer built here.)
             emulated = self.arch not in NATIVE.get(platform.machine(), set())
-            cargo = {}
-            if emulated:
-                cargo["CARGO_BUILD_JOBS"] = "1"
-            if emulated or self.arch in NARROW:
-                cargo["CARGO_PROFILE_RELEASE_LTO"] = "false"
-                cargo["CARGO_PROFILE_RELEASE_CODEGEN_UNITS"] = "16"
+            cargo = {} if not emulated else {
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_RELEASE_LTO": "false",
+                "CARGO_PROFILE_RELEASE_CODEGEN_UNITS": "16",
+            }
             if jobs:
                 cargo["CARGO_BUILD_JOBS"] = jobs
             for package in self.args.selected():

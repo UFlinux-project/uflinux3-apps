@@ -1,9 +1,4 @@
 {
-  "x86": {
-    "runner": "ubuntu-26.04",
-    "qemu_user": "i386",
-    "machine": "pc"
-  },
   "x86_64": {
     "runner": "ubuntu-26.04",
     "qemu_user": "x86_64",
@@ -12,11 +7,6 @@
   "aarch64": {
     "runner": "ubuntu-26.04-arm",
     "qemu_user": "aarch64",
-    "machine": "virt"
-  },
-  "armv7": {
-    "runner": "ubuntu-26.04-arm",
-    "qemu_user": "arm",
     "machine": "virt"
   },
   "ppc64le": {

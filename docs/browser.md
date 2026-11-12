@@ -77,7 +77,9 @@ Two of Alpine's build dependencies for this recipe — `chromium-rust-src` and
 Alpine release, and `armv7` runs out of memory while linking on Alpine's own
 builders. Adding an architecture therefore means adding a toolchain, not a
 patch. `scripts/build.py` skips the package with a note instead of failing when
-CI asks for an unsupported architecture.
+CI asks for an unsupported architecture. (The repository builds 64-bit
+architectures only, so the 32-bit caveats below describe what enabling one
+would take, not a supported configuration.)
 
 ### LTO
 
