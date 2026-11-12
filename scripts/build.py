@@ -65,6 +65,17 @@ NATIVE = {
     "riscv64": {"riscv64"},
 }
 
+# The 32-bit architectures, where the compiler itself is a 32-bit process: its
+# address space is capped near 3 GiB whatever runs it, so a single-codegen-unit
+# LTO link of one of the bigger binaries fails with `rustc-LLVM ERROR: out of
+# memory` / `Buffer allocation failed` long before a 64-bit host would care.
+# This is a property of the target, not of emulation: an x86 rustc running
+# natively on an x86_64 kernel has exactly as little room as one under qemu,
+# which is why the Cargo profile override below is keyed on this set and not on
+# NATIVE. (The browser reaches the same ceiling from the other direction and
+# needs ThinLTO to stay under it; see docs/browser.md.)
+NARROW = {"x86", "armv7"}
+
 # Free space a Rust release build plus an Alpine toolchain comfortably needs.
 MINIMUM_FREE_BYTES = 10 * 1024**3
 
@@ -350,14 +361,20 @@ class Build:
             # shorten. Turning LTO off makes that link parallel and far shorter,
             # for a slightly larger and marginally slower binary, which is a
             # trade worth making only where the alternative is that the
-            # architecture is not published at all. A native build therefore gets
-            # upstream's own profile.
+            # architecture is not published at all. A 64-bit native build
+            # therefore gets upstream's own profile.
+            #
+            # The LTO part of the override is not tied to emulation, though: a
+            # 32-bit rustc OOMs on the same link on any host (see NARROW), so
+            # `x86` and `armv7` get it even when their instructions run
+            # natively. Only the job count stays an emulation concern.
             emulated = self.arch not in NATIVE.get(platform.machine(), set())
-            cargo = {} if not emulated else {
-                "CARGO_BUILD_JOBS": "1",
-                "CARGO_PROFILE_RELEASE_LTO": "false",
-                "CARGO_PROFILE_RELEASE_CODEGEN_UNITS": "16",
-            }
+            cargo = {}
+            if emulated:
+                cargo["CARGO_BUILD_JOBS"] = "1"
+            if emulated or self.arch in NARROW:
+                cargo["CARGO_PROFILE_RELEASE_LTO"] = "false"
+                cargo["CARGO_PROFILE_RELEASE_CODEGEN_UNITS"] = "16"
             if jobs:
                 cargo["CARGO_BUILD_JOBS"] = jobs
             for package in self.args.selected():

@@ -97,6 +97,10 @@ Useful details:
   kernel can run directly, so an `x86_64` host builds `x86` and `x86_64` without
   emulation and an `aarch64` host builds `aarch64` and `armv7` - which is how
   Alpine's own builders do it. The table lives in `NATIVE` in `scripts/build.py`.
+  The Craft Cargo overrides are separate: `CARGO_BUILD_JOBS=1` follows emulation,
+  but the LTO override follows the target's pointer width (`NARROW`), because a
+  32-bit `rustc` runs out of address space on the final link even on a 64-bit
+  kernel.
 - Downloads, the apk cache, `CARGO_HOME` and `CARGO_TARGET_DIR` live under
   `--cache` (default `.cache/build/<arch>`), so re-running a build is incremental
   and safe to delete at any time.
