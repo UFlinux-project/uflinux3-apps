@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=effectcraft
-pkgver=0.24.0
+pkgver=0.24.1
 pkgrel=0
 pkgdesc="Motion graphics and visual effects compositor"
 url="https://getartcraft.com/apps/effectcraft"
@@ -29,11 +29,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="effectcraft-0.24.0.tar.gz::https://github.com/storytold/effectcraft/archive/refs/tags/v0.24.0.tar.gz"
-builddir="$srcdir/effectcraft-0.24.0"
+source="effectcraft-0.24.1.tar.gz::https://github.com/storytold/effectcraft/archive/refs/tags/v0.24.1.tar.gz"
+builddir="$srcdir/effectcraft-0.24.1"
 _craft_app="effectcraft"
 _craft_bins="effectcraft effectcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-7c63f144cdb23eb2713050d76ce19c00bb82afa8b422d56f390fc5a2b87ce76e03c0ff53ddc99c00dd1d2fa7ceee38ad79f5c581f0afc7ed002a9fd96bdc9694  effectcraft-0.24.0.tar.gz
+f3d8119aec4dc423d9edf02aa32747e21f7ef60aff67f25378d027766b548eb5bf03b2f3970778e08002da6a05f59acf1f131e414c443cff728b6a59ee4ce59c  effectcraft-0.24.1.tar.gz
 "

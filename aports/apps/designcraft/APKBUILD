@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=designcraft
-pkgver=0.20.0
+pkgver=0.20.1
 pkgrel=0
 pkgdesc="Lay out magazines, books and print documents"
 url="https://getartcraft.com/apps/designcraft"
@@ -27,11 +27,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="designcraft-0.20.0.tar.gz::https://github.com/storytold/designcraft/archive/refs/tags/v0.20.0.tar.gz"
-builddir="$srcdir/designcraft-0.20.0"
+source="designcraft-0.20.1.tar.gz::https://github.com/storytold/designcraft/archive/refs/tags/v0.20.1.tar.gz"
+builddir="$srcdir/designcraft-0.20.1"
 _craft_app="designcraft"
 _craft_bins="designcraft designcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-83c8dd62a82f70d5033b43dcb3b64fce7fd46c802558a6a1800e87b556a5b98c4d7bbae7e83256a912780e81d0922e2812962355543b4b700c35f949cb79c55d  designcraft-0.20.0.tar.gz
+579f29e4524892935a2a5920bfc5ddbbd37e0e139b23c827d8bb9d00a58e9feef3b5e3a2a5c99d5e7ca6c013489230a545dd4e40583cbd2bd938012e1e02d894  designcraft-0.20.1.tar.gz
 "

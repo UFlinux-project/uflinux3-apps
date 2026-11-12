@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=soundcraft
-pkgver=0.20.0
+pkgver=0.20.1
 pkgrel=0
 pkgdesc="Record, edit and mix audio and MIDI"
 url="https://getartcraft.com/apps/soundcraft"
@@ -32,12 +32,12 @@ subpackages="
 	$pkgname-zsh-completion
 	$pkgname-fish-completion
 	"
-source="soundcraft-0.20.0.tar.gz::https://github.com/storytold/soundcraft/archive/refs/tags/v0.20.0.tar.gz"
-builddir="$srcdir/soundcraft-0.20.0"
+source="soundcraft-0.20.1.tar.gz::https://github.com/storytold/soundcraft/archive/refs/tags/v0.20.1.tar.gz"
+builddir="$srcdir/soundcraft-0.20.1"
 _craft_app="soundcraft"
 _craft_bins="soundcraft soundcraft-cli"
 _craft_man=yes
 . "$startdir/../craft-common.sh"
 sha512sums="
-cc1e15b8d1ce7275bfaccb557a1fbd2499eb0d70dc787b71f6a9b603e7456eb2ba3d1b26ec8c337f4009d117d88b2f8a190cea9d086a687f3143751cadd20c3d  soundcraft-0.20.0.tar.gz
+8572e3200dad49e5527251a5af59ef70710f0b130256b8e51a10ca3e62f0183209e0514379295d5a10eefc8fbae2f768fa231769031fc065955ae0caebe5d332  soundcraft-0.20.1.tar.gz
 "

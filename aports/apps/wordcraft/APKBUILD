@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=wordcraft
-pkgver=0.18.0
+pkgver=0.18.1
 pkgrel=0
 pkgdesc="Write and design documents; open and save Word files"
 url="https://getartcraft.com/apps/wordcraft"
@@ -29,11 +29,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="wordcraft-0.18.0.tar.gz::https://github.com/storytold/wordcraft/archive/refs/tags/v0.18.0.tar.gz"
-builddir="$srcdir/wordcraft-0.18.0"
+source="wordcraft-0.18.1.tar.gz::https://github.com/storytold/wordcraft/archive/refs/tags/v0.18.1.tar.gz"
+builddir="$srcdir/wordcraft-0.18.1"
 _craft_app="wordcraft"
 _craft_bins="wordcraft wordcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-434cc8139f11cf32e3a901627b7262799fb2e772c65632ec681d4872ff5e6f2d33c2319ef5fcf009391fa13ee194b4f2e982ee783998984350f2b36065911d75  wordcraft-0.18.0.tar.gz
+60b78c17b251b9ecf56128735f1dde33cefa2ff95003fa5d817961353b6207000b3aa32d5ca75df63f1d8f1996b353d195a7b6115b973d9fe1fe4fc82931965b  wordcraft-0.18.1.tar.gz
 "

@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=texturecraft
-pkgver=0.6.0
+pkgver=0.6.1
 pkgrel=0
 pkgdesc="Paint PBR textures directly on 3D meshes"
 url="https://getartcraft.com/apps/texturecraft"
@@ -27,11 +27,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="texturecraft-0.6.0.tar.gz::https://github.com/storytold/texturecraft/archive/refs/tags/v0.6.0.tar.gz"
-builddir="$srcdir/texturecraft-0.6.0"
+source="texturecraft-0.6.1.tar.gz::https://github.com/storytold/texturecraft/archive/refs/tags/v0.6.1.tar.gz"
+builddir="$srcdir/texturecraft-0.6.1"
 _craft_app="texturecraft"
 _craft_bins="texturecraft texturecraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-534046a46c443110cffa295cab6dd8fa7c8a85b7be4729425584b83356ffb8d47ec2cc2279f898f7867487e9a88327c401e27fc85a3f52287b8e416496207181  texturecraft-0.6.0.tar.gz
+6a7da0339ac3fb6e8bdd2bbf31d2df96e39514f7cc41a75d34eec54d954c18666051b7e01d46c61e96fa9e5edce3c25ceea35a480cb24509d623ccce87c8d2c2  texturecraft-0.6.1.tar.gz
 "

@@ -4,10 +4,10 @@
   "apps": {
     "anicraft": {
       "repo": "storytold/anicraft",
-      "tag": "v0.2.0",
-      "version": "0.2.0",
-      "url": "https://github.com/storytold/anicraft/archive/refs/tags/v0.2.0.tar.gz",
-      "sha512": "f7fa9a59b6d675b0340e2199ed9b871d0c1129978fe9d5c4fea3b4ade8879044cfa5737470ba0b95f697d55ffa2819c704ceeec183aa1d62adede8e8b20497ee",
+      "tag": "v0.2.1",
+      "version": "0.2.1",
+      "url": "https://github.com/storytold/anicraft/archive/refs/tags/v0.2.1.tar.gz",
+      "sha512": "9896f97cf0ea2687c519eccc2d8d45658dea15e45d7fbbefebe85b9480b5aded0b2e9481e8b9c3929948ddfa5125fe67dc87d49152d368f90226ee0fbd0e56e2",
       "bins": [
         "anicraft",
         "anicraft-cli"
@@ -17,10 +17,10 @@
     },
     "cadcraft": {
       "repo": "storytold/cadcraft",
-      "tag": "v0.20.0",
-      "version": "0.20.0",
-      "url": "https://github.com/storytold/cadcraft/archive/refs/tags/v0.20.0.tar.gz",
-      "sha512": "f0e26400eb6649f62f087158d33fde771410b8b1339d1c43548b97a65fc54b5026413e1184b826d558bf128c023dc22215dbe58f5f2f9a66d479d4e5e163cdcb",
+      "tag": "v0.20.1",
+      "version": "0.20.1",
+      "url": "https://github.com/storytold/cadcraft/archive/refs/tags/v0.20.1.tar.gz",
+      "sha512": "6728933d95a8fa3ef2da72995856d877a6639d475f969cb4d9d7c88beb4287755aabbb16949b206608021ba21247bca1589976f934293da603b37bf8ab891c57",
       "bins": [
         "cadcraft",
         "cadcraft-cli"
@@ -30,10 +30,10 @@
     },
     "deckcraft": {
       "repo": "storytold/deckcraft",
-      "tag": "v0.18.0",
-      "version": "0.18.0",
-      "url": "https://github.com/storytold/deckcraft/archive/refs/tags/v0.18.0.tar.gz",
-      "sha512": "39f1f1ba09391ae293f73da369026603ffff9ea7367e706fb0863039df67aa4594d695018e2cfead03499ea500dee3b5addc2d8bf2c0866784a7e7dfbb1721db",
+      "tag": "v0.18.1",
+      "version": "0.18.1",
+      "url": "https://github.com/storytold/deckcraft/archive/refs/tags/v0.18.1.tar.gz",
+      "sha512": "4b492f9bf7aa0e33d480bf1e16a660af687c2ad0f67f6b713f2577388a8cdd9cdee78a1979c4adc99d5eb6c6de5e3a55aa823578a3f6549fcc91e729e8441bc7",
       "bins": [
         "deckcraft",
         "deckcraft-cli"
@@ -43,10 +43,10 @@
     },
     "designcraft": {
       "repo": "storytold/designcraft",
-      "tag": "v0.20.0",
-      "version": "0.20.0",
-      "url": "https://github.com/storytold/designcraft/archive/refs/tags/v0.20.0.tar.gz",
-      "sha512": "83c8dd62a82f70d5033b43dcb3b64fce7fd46c802558a6a1800e87b556a5b98c4d7bbae7e83256a912780e81d0922e2812962355543b4b700c35f949cb79c55d",
+      "tag": "v0.20.1",
+      "version": "0.20.1",
+      "url": "https://github.com/storytold/designcraft/archive/refs/tags/v0.20.1.tar.gz",
+      "sha512": "579f29e4524892935a2a5920bfc5ddbbd37e0e139b23c827d8bb9d00a58e9feef3b5e3a2a5c99d5e7ca6c013489230a545dd4e40583cbd2bd938012e1e02d894",
       "bins": [
         "designcraft",
         "designcraft-cli"
@@ -56,10 +56,10 @@
     },
     "effectcraft": {
       "repo": "storytold/effectcraft",
-      "tag": "v0.24.0",
-      "version": "0.24.0",
-      "url": "https://github.com/storytold/effectcraft/archive/refs/tags/v0.24.0.tar.gz",
-      "sha512": "7c63f144cdb23eb2713050d76ce19c00bb82afa8b422d56f390fc5a2b87ce76e03c0ff53ddc99c00dd1d2fa7ceee38ad79f5c581f0afc7ed002a9fd96bdc9694",
+      "tag": "v0.24.1",
+      "version": "0.24.1",
+      "url": "https://github.com/storytold/effectcraft/archive/refs/tags/v0.24.1.tar.gz",
+      "sha512": "f3d8119aec4dc423d9edf02aa32747e21f7ef60aff67f25378d027766b548eb5bf03b2f3970778e08002da6a05f59acf1f131e414c443cff728b6a59ee4ce59c",
       "bins": [
         "effectcraft",
         "effectcraft-cli"
@@ -69,10 +69,10 @@
     },
     "figcraft": {
       "repo": "storytold/figcraft",
-      "tag": "v0.18.0",
-      "version": "0.18.0",
-      "url": "https://github.com/storytold/figcraft/archive/refs/tags/v0.18.0.tar.gz",
-      "sha512": "dafe0518a2982a21b1e237b716e603fe04fbf399b5da9b9b7f9b07530aca4ddd92ea16fa5b85fa94fd7ae4b0b453ea85fd98878facd1142856c2676a8e7eb6dd",
+      "tag": "v0.18.1",
+      "version": "0.18.1",
+      "url": "https://github.com/storytold/figcraft/archive/refs/tags/v0.18.1.tar.gz",
+      "sha512": "ce73f3e24c1dbc43f375701ae51b38f866f2226c90d39ab9d5f417c1d70e1f273892f012c8d9fa17959280c2b7ab55139780f928766264aaa7e9df7f09b48634",
       "bins": [
         "figcraft",
         "figcraft-cli"
@@ -82,10 +82,10 @@
     },
     "filmcraft": {
       "repo": "storytold/filmcraft",
-      "tag": "v0.20.0",
-      "version": "0.20.0",
-      "url": "https://github.com/storytold/filmcraft/archive/refs/tags/v0.20.0.tar.gz",
-      "sha512": "cb5898ba9c382c41c78290c99f034f0471cf084874ba8d7799fbcc74531e25c832adf2ef82a18e4900169bbe66a0ae096d3b4da6dd8c72ad082f88872b9ba006",
+      "tag": "v0.20.1",
+      "version": "0.20.1",
+      "url": "https://github.com/storytold/filmcraft/archive/refs/tags/v0.20.1.tar.gz",
+      "sha512": "b9ae448303975ed559c6225864548906a69f7326d8ba0d08c3cc9a340d455e7b5b46e3e5ff8ed3d2d38b2e5c0371f38ac8f73a27ec7273914ec2985f0694bce3",
       "bins": [
         "filmcraft",
         "filmcraft-cli"
@@ -95,10 +95,10 @@
     },
     "lightcraft": {
       "repo": "storytold/lightcraft",
-      "tag": "v0.21.0",
-      "version": "0.21.0",
-      "url": "https://github.com/storytold/lightcraft/archive/refs/tags/v0.21.0.tar.gz",
-      "sha512": "9fb7f56336907d716da95f2a05ae627912980beae8e81a47add1d7e50a7a359d539bd143476b1c27dde2c8000b2236dfde86b837e2a1512d2f2b09a71a159de0",
+      "tag": "v0.21.1",
+      "version": "0.21.1",
+      "url": "https://github.com/storytold/lightcraft/archive/refs/tags/v0.21.1.tar.gz",
+      "sha512": "0c0459c5e4b1f3b1d61baa50ff6b4a3b049524df8254ec80407d224f6793e93e4b6e3d159bf81c72b0eb27fa5b1276eec368e902ea58532dc4900dc1e76d7726",
       "bins": [
         "lightcraft",
         "lightcraft-cli"
@@ -111,10 +111,10 @@
     },
     "materialcraft": {
       "repo": "storytold/materialcraft",
-      "tag": "v0.4.0",
-      "version": "0.4.0",
-      "url": "https://github.com/storytold/materialcraft/archive/refs/tags/v0.4.0.tar.gz",
-      "sha512": "db04e0acb4042dc280b5b9252a16076b10f5cca6cc318ab1da2e30f839fb6314cf9856bb70b028ed6d77020cd6c3f3b01a5e5b62d410db4cda022ecc819b0830",
+      "tag": "v0.4.1",
+      "version": "0.4.1",
+      "url": "https://github.com/storytold/materialcraft/archive/refs/tags/v0.4.1.tar.gz",
+      "sha512": "5dd0819d89354571531bd75ac77d625a427105ff49de6d77edc9f8b2d3c50e50da7d291609c46a4bd2f852e7181fa93efcb0fe7d3fb610dbc2318488dece1f95",
       "bins": [
         "materialcraft",
         "materialcraft-cli"
@@ -124,10 +124,10 @@
     },
     "pdfcraft": {
       "repo": "storytold/pdfcraft",
-      "tag": "v0.21.0",
-      "version": "0.21.0",
-      "url": "https://github.com/storytold/pdfcraft/archive/refs/tags/v0.21.0.tar.gz",
-      "sha512": "1ca1ab98c4f843fc2456112d29ebb07bec138ef671c65c2e9a058a6adfcff49242516a7ee19204b5834e03510008c56ff991f7721ed777997665c10176d049d7",
+      "tag": "v0.21.1",
+      "version": "0.21.1",
+      "url": "https://github.com/storytold/pdfcraft/archive/refs/tags/v0.21.1.tar.gz",
+      "sha512": "aabbea1fedfd526b38a3269340d10025a5cf930783df69a9d19845792799d3ca66ffcc9426cc08506f01cf482995c6516a436d76c691092a36bedd8584133d91",
       "bins": [
         "pdfcraft",
         "pdfcraft-cli"
@@ -137,10 +137,10 @@
     },
     "photocraft": {
       "repo": "storytold/photocraft",
-      "tag": "v0.23.0",
-      "version": "0.23.0",
-      "url": "https://github.com/storytold/photocraft/archive/refs/tags/v0.23.0.tar.gz",
-      "sha512": "88c777e41eaaa0f93f80aac7a45a0fad44fd738cb4f4b96cf637a9e3b062d4781f3a91d89911c5107c9bb2dd199287b9de3c0019397d52a94d8d409e5f486faa",
+      "tag": "v0.23.1",
+      "version": "0.23.1",
+      "url": "https://github.com/storytold/photocraft/archive/refs/tags/v0.23.1.tar.gz",
+      "sha512": "33dc31b93b023d46883b3f8c6c629a18af9a710a1ee160e1a8304e9c2e015c2a38049de7a2dc9f75aad926fb520050778cb110316ceb929aa284a64b443962bc",
       "bins": [
         "photocraft",
         "photocraft-cli"
@@ -152,10 +152,10 @@
     },
     "soundcraft": {
       "repo": "storytold/soundcraft",
-      "tag": "v0.20.0",
-      "version": "0.20.0",
-      "url": "https://github.com/storytold/soundcraft/archive/refs/tags/v0.20.0.tar.gz",
-      "sha512": "cc1e15b8d1ce7275bfaccb557a1fbd2499eb0d70dc787b71f6a9b603e7456eb2ba3d1b26ec8c337f4009d117d88b2f8a190cea9d086a687f3143751cadd20c3d",
+      "tag": "v0.20.1",
+      "version": "0.20.1",
+      "url": "https://github.com/storytold/soundcraft/archive/refs/tags/v0.20.1.tar.gz",
+      "sha512": "8572e3200dad49e5527251a5af59ef70710f0b130256b8e51a10ca3e62f0183209e0514379295d5a10eefc8fbae2f768fa231769031fc065955ae0caebe5d332",
       "bins": [
         "soundcraft",
         "soundcraft-cli"
@@ -165,10 +165,10 @@
     },
     "texturecraft": {
       "repo": "storytold/texturecraft",
-      "tag": "v0.6.0",
-      "version": "0.6.0",
-      "url": "https://github.com/storytold/texturecraft/archive/refs/tags/v0.6.0.tar.gz",
-      "sha512": "534046a46c443110cffa295cab6dd8fa7c8a85b7be4729425584b83356ffb8d47ec2cc2279f898f7867487e9a88327c401e27fc85a3f52287b8e416496207181",
+      "tag": "v0.6.1",
+      "version": "0.6.1",
+      "url": "https://github.com/storytold/texturecraft/archive/refs/tags/v0.6.1.tar.gz",
+      "sha512": "6a7da0339ac3fb6e8bdd2bbf31d2df96e39514f7cc41a75d34eec54d954c18666051b7e01d46c61e96fa9e5edce3c25ceea35a480cb24509d623ccce87c8d2c2",
       "bins": [
         "texturecraft",
         "texturecraft-cli"
@@ -178,10 +178,10 @@
     },
     "vectorcraft": {
       "repo": "storytold/vectorcraft",
-      "tag": "v0.24.0",
-      "version": "0.24.0",
-      "url": "https://github.com/storytold/vectorcraft/archive/refs/tags/v0.24.0.tar.gz",
-      "sha512": "446b1e00254797f7a89831a78fa16d3cb554452ee7b21ce2bc0aab2d3bc3d1287bca5a54220c3c015ccef154d07fcff9d5121733abbdb787369905c1feb47e9a",
+      "tag": "v0.24.1",
+      "version": "0.24.1",
+      "url": "https://github.com/storytold/vectorcraft/archive/refs/tags/v0.24.1.tar.gz",
+      "sha512": "a2ad135ea6c0e21bf92f9c394d1a75f77f115bef4aad30db3183ceee8f725d3f627f49fe71948fedee49c9b17f40fb1c5e712e7f4b61d56d7b440157b717e7ca",
       "bins": [
         "vectorcraft",
         "vectorcraft-cli"
@@ -191,10 +191,10 @@
     },
     "wordcraft": {
       "repo": "storytold/wordcraft",
-      "tag": "v0.18.0",
-      "version": "0.18.0",
-      "url": "https://github.com/storytold/wordcraft/archive/refs/tags/v0.18.0.tar.gz",
-      "sha512": "434cc8139f11cf32e3a901627b7262799fb2e772c65632ec681d4872ff5e6f2d33c2319ef5fcf009391fa13ee194b4f2e982ee783998984350f2b36065911d75",
+      "tag": "v0.18.1",
+      "version": "0.18.1",
+      "url": "https://github.com/storytold/wordcraft/archive/refs/tags/v0.18.1.tar.gz",
+      "sha512": "60b78c17b251b9ecf56128735f1dde33cefa2ff95003fa5d817961353b6207000b3aa32d5ca75df63f1d8f1996b353d195a7b6115b973d9fe1fe4fc82931965b",
       "bins": [
         "wordcraft",
         "wordcraft-cli"

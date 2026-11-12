@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=cadcraft
-pkgver=0.20.0
+pkgver=0.20.1
 pkgrel=0
 pkgdesc="Draft, dimension and plot 2D drawings; open DXF and DWG"
 url="https://getartcraft.com/apps/cadcraft"
@@ -30,12 +30,12 @@ subpackages="
 	$pkgname-zsh-completion
 	$pkgname-fish-completion
 	"
-source="cadcraft-0.20.0.tar.gz::https://github.com/storytold/cadcraft/archive/refs/tags/v0.20.0.tar.gz"
-builddir="$srcdir/cadcraft-0.20.0"
+source="cadcraft-0.20.1.tar.gz::https://github.com/storytold/cadcraft/archive/refs/tags/v0.20.1.tar.gz"
+builddir="$srcdir/cadcraft-0.20.1"
 _craft_app="cadcraft"
 _craft_bins="cadcraft cadcraft-cli"
 _craft_man=yes
 . "$startdir/../craft-common.sh"
 sha512sums="
-f0e26400eb6649f62f087158d33fde771410b8b1339d1c43548b97a65fc54b5026413e1184b826d558bf128c023dc22215dbe58f5f2f9a66d479d4e5e163cdcb  cadcraft-0.20.0.tar.gz
+6728933d95a8fa3ef2da72995856d877a6639d475f969cb4d9d7c88beb4287755aabbb16949b206608021ba21247bca1589976f934293da603b37bf8ab891c57  cadcraft-0.20.1.tar.gz
 "

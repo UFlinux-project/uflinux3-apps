@@ -1,6 +1,6 @@
 # Maintainer: uflinux3-apps contributors <noreply@uflinux.org>
 pkgname=deckcraft
-pkgver=0.18.0
+pkgver=0.18.1
 pkgrel=0
 pkgdesc="Create and present slide decks"
 url="https://getartcraft.com/apps/deckcraft"
@@ -29,11 +29,11 @@ depends="
 subpackages="
 	$pkgname-doc
 	"
-source="deckcraft-0.18.0.tar.gz::https://github.com/storytold/deckcraft/archive/refs/tags/v0.18.0.tar.gz"
-builddir="$srcdir/deckcraft-0.18.0"
+source="deckcraft-0.18.1.tar.gz::https://github.com/storytold/deckcraft/archive/refs/tags/v0.18.1.tar.gz"
+builddir="$srcdir/deckcraft-0.18.1"
 _craft_app="deckcraft"
 _craft_bins="deckcraft deckcraft-cli"
 . "$startdir/../craft-common.sh"
 sha512sums="
-39f1f1ba09391ae293f73da369026603ffff9ea7367e706fb0863039df67aa4594d695018e2cfead03499ea500dee3b5addc2d8bf2c0866784a7e7dfbb1721db  deckcraft-0.18.0.tar.gz
+4b492f9bf7aa0e33d480bf1e16a660af687c2ad0f67f6b713f2577388a8cdd9cdee78a1979c4adc99d5eb6c6de5e3a55aa823578a3f6549fcc91e729e8441bc7  deckcraft-0.18.1.tar.gz
 "
